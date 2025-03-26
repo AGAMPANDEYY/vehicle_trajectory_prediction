@@ -1,0 +1,6 @@
+gdown
+awscli==1.38.18
+inference==0.9.17
+supervision>=0.20.0
+tqdm
+ultralytics<=8.3.40
