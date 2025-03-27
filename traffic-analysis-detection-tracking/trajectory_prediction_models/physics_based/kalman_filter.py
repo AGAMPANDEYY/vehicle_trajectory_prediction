@@ -54,7 +54,14 @@ class KalmanFilterPredictor:
     def predict_future(self, steps=10):
         """Predict future positions"""
         future_positions = []
-        kf_copy = self.kf.copy()
+        # Create a deep copy of the Kalman filter state
+        kf_copy = KalmanFilter(dim_x=self.kf.dim_x, dim_z=self.kf.dim_z)
+        kf_copy.F = self.kf.F.copy()
+        kf_copy.H = self.kf.H.copy()
+        kf_copy.R = self.kf.R.copy()
+        kf_copy.P = self.kf.P.copy()
+        kf_copy.Q = self.kf.Q.copy()
+        kf_copy.x = self.kf.x.copy()
         
         for _ in range(steps):
             kf_copy.predict()
@@ -113,6 +120,6 @@ def process_tracking_data(data_path, tracker_id, save_plots=True):
 
 if __name__ == "__main__":
     # Example usage
-    data_path = 'C:/Agam/Work/cen-300/supervision/examples/traffic_analysis/data/tracking_data.csv'
+    data_path = 'data/tracking_data.csv'
     tracker_id = 1
     predicted_positions, future_positions = process_tracking_data(data_path, tracker_id)
