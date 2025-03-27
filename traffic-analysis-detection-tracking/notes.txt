@@ -1,0 +1,22 @@
+"""
+
+"""
+
+(venv_cen) 
+USER@DESKTOP-9HMMGG6 MINGW64 /c/Agam/Work/cen-300
+$ python supervision/examples/traffic_analysis/trajectory_prediction_models/physics_based/kalman_filter.py
+
+
+(venv_cen) 
+USER@DESKTOP-9HMMGG6 MINGW64 /c/Agam/Work/cen-300
+$ python supervision/examples/traffic_analysis/trajectory_prediction_models/deep_learning_based/trajectory_prediction.py
+
+
+
+Running Main.py
+
+$ python main.py \
+    --source_weights_path data/traffic_analysis.pt \
+    --source_video_path data/0212.mp4 \
+    --target_video_path data/output_video.mp4 \
+    --lstm_model_path trajectory_prediction_models/deep_learning_based/trajectory_predictor.pth

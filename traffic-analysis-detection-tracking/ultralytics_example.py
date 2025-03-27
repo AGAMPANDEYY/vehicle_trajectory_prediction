@@ -1,5 +1,8 @@
 import argparse
 from typing import Dict, Iterable, List, Optional, Set
+import pandas as pd
+from datetime import datetime
+import time
 
 import cv2
 import numpy as np
@@ -94,6 +97,7 @@ class VideoProcessor:
         source_weights_path: str,
         source_video_path: str,
         target_video_path: Optional[str] = None,
+        output_csv_path: Optional[str] = None,
         confidence_threshold: float = 0.3,
         iou_threshold: float = 0.7,
     ) -> None:
@@ -101,6 +105,11 @@ class VideoProcessor:
         self.iou_threshold = iou_threshold
         self.source_video_path = source_video_path
         self.target_video_path = target_video_path
+        self.output_csv_path = output_csv_path
+        
+        # Initialize DataFrame for storing tracking data
+        self.tracking_data = []
+        self.start_time = time.time()
 
         self.model = YOLO(source_weights_path)
         self.tracker = sv.ByteTrack()
@@ -135,6 +144,12 @@ class VideoProcessor:
                 if cv2.waitKey(1) & 0xFF == ord("q"):
                     break
             cv2.destroyAllWindows()
+        
+        # Save tracking data to CSV if output path is provided
+        if self.output_csv_path and self.tracking_data:
+            df = pd.DataFrame(self.tracking_data)
+            df.to_csv(self.output_csv_path, index=False)
+            print(f"Tracking data saved to {self.output_csv_path}")
 
     def annotate_frame(
         self, frame: np.ndarray, detections: sv.Detections
@@ -179,6 +194,21 @@ class VideoProcessor:
         detections.class_id = np.zeros(len(detections))
         detections = self.tracker.update_with_detections(detections)
 
+        # Store tracking data for each detection
+        if len(detections) > 0:
+            current_time = time.time() - self.start_time
+            for tracker_id, xyxy in zip(detections.tracker_id, detections.xyxy):
+                x1, y1, x2, y2 = xyxy
+                center_x = (x1 + x2) / 2
+                center_y = (y1 + y2) / 2
+                
+                self.tracking_data.append({
+                    'timestamp': current_time,
+                    'tracker_id': tracker_id,
+                    'x': center_x,
+                    'y': center_y
+                })
+
         detections_in_zones = []
         detections_out_zones = []
 
@@ -218,6 +248,12 @@ if __name__ == "__main__":
         type=str,
     )
     parser.add_argument(
+        "--output_csv_path",
+        default=None,
+        help="Path to save tracking data CSV file",
+        type=str,
+    )
+    parser.add_argument(
         "--confidence_threshold",
         default=0.3,
         help="Confidence threshold for the model",
@@ -232,6 +268,7 @@ if __name__ == "__main__":
         source_weights_path=args.source_weights_path,
         source_video_path=args.source_video_path,
         target_video_path=args.target_video_path,
+        output_csv_path=args.output_csv_path,
         confidence_threshold=args.confidence_threshold,
         iou_threshold=args.iou_threshold,
     )

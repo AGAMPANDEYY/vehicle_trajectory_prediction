@@ -4,3 +4,6 @@ inference==0.9.17
 supervision>=0.20.0
 tqdm
 ultralytics<=8.3.40
+filterpy # for kalman filter
+scikit-learn # for deep learning based trajectory prediction
+opencv-python
