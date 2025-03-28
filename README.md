@@ -6,41 +6,38 @@ Latest approach and update
 
 ![pipeline](https://github.com/AGAMPANDEYY/vehicle_trajectory_prediction/blob/main/media/traj-pred.png)
 
-Vehicle Trajectory Prediction
-==========================
+# Vehicle Trajectory Prediction
 
-Introduction
+## Introduction  
 This repository contains a project focused on predicting vehicle trajectories using advanced machine learning techniques. The goal is to accurately forecast the future path of vehicles based on historical data, which can be crucial for autonomous driving systems, traffic management, and safety applications.
 
-- Table of Contents
-- Introduction
+## Table of Contents  
+- [Introduction](#introduction)  
+- [Getting Started](#getting-started)  
+- [Project Structure](#project-structure)  
+- [Installation](#installation)  
+- [Usage](#usage)  
+- [Guiding Code Snippets](#guiding-code-snippets)  
+- [Contributing](#contributing)  
+- [License](#license)  
 
-- Getting Started
-
-- Project Structure
-
-- Installation
-
-- Usage
-
-- Guiding Code Snippets
-
-- Contributing
-
-- License
-
-Getting Started
+## Getting Started  
 To begin working with this project, follow these steps:
 
-Clone the Repository: Clone this repository to your local machine using Git.
+### Clone the Repository  
+Clone this repository to your local machine using Git.
 
-bash
+```bash
 git clone https://github.com/AGAMPANDEYY/vehicle_trajectory_prediction.git
-Navigate to the Project Directory:
+```
 
-bash
+### Navigate to the Project Directory:
+
+``` bash
 cd vehicle_trajectory_prediction
-Project Structure
+```
+
+### Project Structure
 The project is organized as follows:
 
 data: Contains datasets used for training and testing.
@@ -54,26 +51,31 @@ main.py: The entry point for running the prediction pipeline.
 Installation
 To install the required dependencies, run:
 
-bash
+```bash
 pip install -r requirements.txt
+```
 Ensure you have Python and pip installed on your system.
 
-Usage
+### Usage
 Running the Prediction Model
 Prepare Data: Ensure your dataset is in the data directory.
 
 Train the Model: Run the training script.
 
-bash
+``` bash
 python main.py --mode train
+```
+
 Make Predictions: Use the trained model to predict trajectories.
 
-bash
+```bash
 python main.py --mode predict
-Example Use Case
+```
+
+### Example Use Case
 For a more detailed example, consider the following Python snippet:
 
-python
+``` python
 import numpy as np
 from models import TrajectoryPredictor
 
@@ -88,9 +90,10 @@ predictor.train(data)
 
 # Make predictions
 predictions = predictor.predict(data)
-Guiding Code Snippets
+``` 
+### Guiding Code Snippets
 Data Preprocessing
-python
+``` python
 import pandas as pd
 
 # Load data
@@ -117,7 +120,9 @@ predictor.train(train_data)
 # Evaluate the model
 accuracy = predictor.evaluate(test_data)
 print(f"Model Accuracy: {accuracy}")
-Contributing
+```
+
+### Contributing
 Contributions are welcome! To contribute, please follow these steps:
 
 Fork the repository.
@@ -128,7 +133,7 @@ Implement your changes.
 
 Open a pull request.
 
-License
+### License
 This project is licensed under the MIT License. See LICENSE for details.
 
 Feel free to adjust this template based on specific details from your repository. Ensure that you include accurate information about the project structure, dependencies, and usage guidelines.
