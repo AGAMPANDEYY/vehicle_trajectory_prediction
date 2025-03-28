@@ -7,3 +7,6 @@ venv/
 *.png
 *.jpg
 *.jpeg
+vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/output_video.mp4/
+vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/0212.mp4
+vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/traffic_analysis.pt

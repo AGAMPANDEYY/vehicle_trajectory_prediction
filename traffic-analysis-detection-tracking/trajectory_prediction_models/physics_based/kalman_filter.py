@@ -120,6 +120,6 @@ def process_tracking_data(data_path, tracker_id, save_plots=True):
 
 if __name__ == "__main__":
     # Example usage
-    data_path = 'C:/Agam/Work/cen-300/supervision/examples/traffic_analysis/data/tracking_data.csv'
+    data_path = 'data/tracking_data.csv'
     tracker_id = 1
     predicted_positions, future_positions = process_tracking_data(data_path, tracker_id)

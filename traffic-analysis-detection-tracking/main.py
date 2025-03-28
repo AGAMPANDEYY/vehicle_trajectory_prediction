@@ -157,6 +157,10 @@ class VideoProcessor:
                         'tracker_id': tracker_id,
                         'x': actual_x,
                         'y': actual_y,
+                        'x1': x1,  # Bounding box coordinates
+                        'y1': y1,
+                        'x2': x2,
+                        'y2': y2,
                         'prediction_type': 'actual',
                         'sequence_index': i
                     })
