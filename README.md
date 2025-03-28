@@ -35,7 +35,7 @@ git clone https://github.com/AGAMPANDEYY/vehicle_trajectory_prediction.git
 cd vehicle_trajectory_prediction
 ```
 
-📂 Project Structure
+### Project Structure
 
 The project is organized as follows:  
 
