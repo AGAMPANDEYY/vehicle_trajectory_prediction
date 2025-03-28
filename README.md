@@ -35,16 +35,13 @@ git clone https://github.com/AGAMPANDEYY/vehicle_trajectory_prediction.git
 cd vehicle_trajectory_prediction
 ```
 
-### Project Structure
-The project is organized as follows:
+📂 Project Structure
 
-data: Contains datasets used for training and testing.
+The project is organized as follows:  
 
-models: Includes the machine learning models implemented for trajectory prediction.
-
-utils: Utility functions for data preprocessing and visualization.
-
-main.py: The entry point for running the prediction pipeline.
+- **`traffic-analysis-detection-tracking/data/`** – Contains datasets used for training and testing.  
+- **`traffic-analysis-detection-tracking/trajectory_prediction_models`** – Includes the machine learning models implemented for trajectory prediction.  
+- **`traffic-analysis-detection-tracking/main.py/`** – The entry point for running the prediction pipeline.  
 
 Installation
 To install the required dependencies, run:
