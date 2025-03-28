@@ -121,15 +121,27 @@ print(f"Model Accuracy: {accuracy}")
 ```
 
 ### Contributing
-Contributions are welcome! To contribute, please follow these steps:
 
-Fork the repository.
+We welcome contributions from the community! To contribute, please follow these steps:
 
-Create a new branch for your feature.
+#### Steps to Contribute  
 
-Implement your changes.
+1. **Fork the Repository**  
+   Click the **Fork** button on the top right of this repository to create your own copy.  
 
-Open a pull request.
+2. **Clone Your Fork**  
+   Clone your forked repository to your local machine:  
+   ```bash
+   git clone https://github.com/your-username/repository-name.git
+   cd repository-name
+   ```
+3. **Create a New Branch**
+   Create a branch for your feature or fix:
+
+``` bash
+git checkout -b feature-branch-name
+```
+4. **Commit, Push and open a PR!**
 
 ### License
 This project is licensed under the MIT License. See LICENSE for details.
