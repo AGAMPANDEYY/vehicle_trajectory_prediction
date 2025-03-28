@@ -14,7 +14,7 @@ $ python supervision/examples/traffic_analysis/trajectory_prediction_models/deep
 
 
 Running Main.py
-
+ cd traffic-analysis-detection-tracking/trajectory_prediction_mdels
 $ python main.py \
     --source_weights_path data/traffic_analysis.pt \
     --source_video_path data/0212.mp4 \

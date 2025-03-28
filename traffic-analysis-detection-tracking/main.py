@@ -169,6 +169,10 @@ class VideoProcessor:
                         'tracker_id': tracker_id,
                         'x': pred_x,
                         'y': pred_y,
+                        'x1': None,  # No bounding box for predictions
+                        'y1': None,
+                        'x2': None,
+                        'y2': None,
                         'prediction_type': 'lstm',
                         'sequence_index': i
                     })
@@ -181,6 +185,10 @@ class VideoProcessor:
                         'tracker_id': tracker_id,
                         'x': pred_x,
                         'y': pred_y,
+                        'x1': None,  # No bounding box for predictions
+                        'y1': None,
+                        'x2': None,
+                        'y2': None,
                         'prediction_type': 'kalman',
                         'sequence_index': i
                     })
