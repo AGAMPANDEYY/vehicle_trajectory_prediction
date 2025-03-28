@@ -137,10 +137,10 @@ We welcome contributions from the community! To contribute, please follow these 
    ```
 3. **Create a New Branch**
    Create a branch for your feature or fix:
-
-``` bash
-git checkout -b feature-branch-name
-```
+   
+   ``` bash
+   git checkout -b feature-branch-name
+   ```
 4. **Commit, Push and open a PR!**
 
 ### License
