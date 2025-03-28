@@ -144,6 +144,7 @@ We welcome contributions from the community! To contribute, please follow these 
 4. **Commit, Push and open a PR!**
 
 ### License
-This project is licensed under the MIT License. See LICENSE for details.
+> [!NOTE]
+> This project is licensed under the MIT License. See LICENSE for details.
 
 Feel free to adjust this template based on specific details from your repository. Ensure that you include accurate information about the project structure, dependencies, and usage guidelines.
