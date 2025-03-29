@@ -60,6 +60,7 @@ class VideoProcessor:
         # Initialize trajectory storage
         self.trajectories = {}
         self.current_sequences = {}
+        self.bbox_sequences = {}
         self.frame_count = 0
         self.start_time = time.time()
         
@@ -122,12 +123,16 @@ class VideoProcessor:
             if tracker_id not in self.trajectories:
                 self.trajectories[tracker_id] = []
                 self.current_sequences[tracker_id] = []
+                self.bbox_sequences[tracker_id] = []  # Store historical bounding boxes
                 self.predictor.kalman_filters[tracker_id] = self.predictor.initialize_kalman_filter(tracker_id)
             
-            # Update current sequence
+            # Update current sequence with both center points and bounding boxes
             self.current_sequences[tracker_id].append([center_x, center_y])
+            self.bbox_sequences[tracker_id].append([x1, y1, x2, y2])
+            
             if len(self.current_sequences[tracker_id]) > 20:  # Keep last 20 positions
                 self.current_sequences[tracker_id].pop(0)
+                self.bbox_sequences[tracker_id].pop(0)
             
             # Update Kalman filter
             kf = self.predictor.kalman_filters[tracker_id]
@@ -149,15 +154,15 @@ class VideoProcessor:
                 kalman_predictions = kf.predict_future(self.predictor.prediction_length)
                 
                 # Store data for CSV
-                # Store actual positions
-                for i, (actual_x, actual_y) in enumerate(self.current_sequences[tracker_id]):
+                # Store actual positions with their corresponding bounding boxes
+                for i, ((actual_x, actual_y), (x1, y1, x2, y2)) in enumerate(zip(self.current_sequences[tracker_id], self.bbox_sequences[tracker_id])):
                     self.tracking_data.append({
                         'frame_number': self.frame_count - len(self.current_sequences[tracker_id]) + i,
                         'timestamp': time.time() - self.start_time,
                         'tracker_id': tracker_id,
                         'x': actual_x,
                         'y': actual_y,
-                        'x1': x1,  # Bounding box coordinates
+                        'x1': x1,
                         'y1': y1,
                         'x2': x2,
                         'y2': y2,
@@ -165,34 +170,50 @@ class VideoProcessor:
                         'sequence_index': i
                     })
                 
-                # Store LSTM predictions
+                # Calculate average bounding box size from historical data
+                avg_width = np.mean([x2 - x1 for x1, y1, x2, y2 in self.bbox_sequences[tracker_id]])
+                avg_height = np.mean([y2 - y1 for x1, y1, x2, y2 in self.bbox_sequences[tracker_id]])
+                
+                # Store LSTM predictions with estimated bounding boxes
                 for i, (pred_x, pred_y) in enumerate(lstm_predictions):
+                    # Estimate bounding box for prediction
+                    pred_x1 = pred_x - avg_width/2
+                    pred_y1 = pred_y - avg_height/2
+                    pred_x2 = pred_x + avg_width/2
+                    pred_y2 = pred_y + avg_height/2
+                    
                     self.tracking_data.append({
                         'frame_number': self.frame_count + i,
                         'timestamp': time.time() - self.start_time,
                         'tracker_id': tracker_id,
                         'x': pred_x,
                         'y': pred_y,
-                        'x1': None,  # No bounding box for predictions
-                        'y1': None,
-                        'x2': None,
-                        'y2': None,
+                        'x1': pred_x1,
+                        'y1': pred_y1,
+                        'x2': pred_x2,
+                        'y2': pred_y2,
                         'prediction_type': 'lstm',
                         'sequence_index': i
                     })
                 
-                # Store Kalman predictions
+                # Store Kalman predictions with estimated bounding boxes
                 for i, (pred_x, pred_y) in enumerate(kalman_predictions):
+                    # Estimate bounding box for prediction
+                    pred_x1 = pred_x - avg_width/2
+                    pred_y1 = pred_y - avg_height/2
+                    pred_x2 = pred_x + avg_width/2
+                    pred_y2 = pred_y + avg_height/2
+                    
                     self.tracking_data.append({
                         'frame_number': self.frame_count + i,
                         'timestamp': time.time() - self.start_time,
                         'tracker_id': tracker_id,
                         'x': pred_x,
                         'y': pred_y,
-                        'x1': None,  # No bounding box for predictions
-                        'y1': None,
-                        'x2': None,
-                        'y2': None,
+                        'x1': pred_x1,
+                        'y1': pred_y1,
+                        'x2': pred_x2,
+                        'y2': pred_y2,
                         'prediction_type': 'kalman',
                         'sequence_index': i
                     })
