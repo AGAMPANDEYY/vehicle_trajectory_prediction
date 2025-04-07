@@ -129,12 +129,14 @@ class SDTATTModel(nn.Module):
 
 if __name__=="__main__":
    
+   from dataloader import SDTATTDataset
+   import os 
 
+   BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+   tracking_data_numpy_path= os.path.join(BASE_DIR, "data", "sdtatt_data.npy")
+   dataset= SDTATTDataset(tracking_data_numpy_path)
    
    model= SDTATTModel()
-   batch = {
-    "tv_hist": torch.randn(16, 20, 2),
-    "nv_sp": torch.randn(16, 8, 20, 2),
-    "nv_dp": torch.randn(16, 8, 20, 2)}
-   output = model(batch["tv_hist"], batch["nv_sp"], batch["nv_dp"])
-   print(output.shape)  # [16, 30, 2]
+
+   output = model(dataset[0]['tv_hist'].unsqueeze(0), dataset[0]['nv_sp'].unsqueeze(0), dataset[0]['nv_dp'].unsqueeze(0))
+   print(output.shape)  

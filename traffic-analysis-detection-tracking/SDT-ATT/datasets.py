@@ -104,8 +104,12 @@ def get_window_sequences(df):
     return all_samples
 
 if __name__ == "__main__": 
-    path = r"C:\Agam\Work\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\data\tracking_data.csv"  
-    df = load_data(path)
+
+    import os 
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    PARENT_DIR = os.path.dirname(BASE_DIR)
+    csv_path= os.path.join(PARENT_DIR,"data", "tracking_data.csv")
+    df = load_data(csv_path)
     dataset = get_window_sequences(df)
 
     # Save as numpy
