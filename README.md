@@ -1,7 +1,12 @@
 # vehicle_trajectory_prediction
 This project is part of CEN 300 course subject at the Civil Engineering department IIT Roorkee for Pre-Final year students.
 
-LATEST UPDATE SDTATT
+LATEST UPDATE SDTATT +Lane Change + Conflict Zone Identification
+
+1. Trained yolov8 (already pretrained on drone video) on our video dataset with 200 annotated images. (Each image has more than 12 vehicles so took long time) 
+2. Build codes of SDTATT model from this paper https://ieeexplore.ieee.org/document/10323306/the used Target vehicle, 5 neighboring vehicles and 20 past frames history x,y. Used BiLSTM and Spatial Temporal Attention layers to predict contextual target vehicle future maneuver.
+3. Now, once we have for each frame_id and vehicle_id  the future predicted trajectory, we perform lane change detection and conflict zone predictions. The lane change and conflict zone codes are also our own. 
+4. We have to perform inference now to test the pipeline and once we run it, we will have final data of { timestamp, conflict_x, conflict_y, list_of_vehicles_involved} and we'll plot the conflict zones on the video and we could then come to a conclusion of potential accident locations in the video
 
 ![sdtatt model](media/SDTATT.png)
 
