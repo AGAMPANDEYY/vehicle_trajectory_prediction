@@ -1,5 +1,7 @@
 #python traffic-analysis-detection-tracking/SDT-ATT/eval.py
 
+####3###
+
 import torch
 from torch.utils.data import DataLoader
 from model import SDTATTModel
@@ -21,53 +23,62 @@ N_DATA_PATH = os.path.join(BASE_DIR, "data", "sdtatt_data.npy")  # update if nee
 
 NUM_SAMPLES_TO_PREDICT=5
 
-# ---- Device ----
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def SDTATT_predict():
+    # ---- Device ----
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# ---- Load Dataset ----
-dataset = SDTATTDataset(N_DATA_PATH)
+    # ---- Load Dataset ----
+    dataset = SDTATTDataset(N_DATA_PATH)
 
-print("Dataset details:")
-print(f"Number of samples: {len(dataset)}")
-print(f"Sample keys: {dataset[0].keys()}")  # Check keys in the first sample
-print(f"Sample shape: {dataset[0]['tv_hist'].shape}, {dataset[0]['nv_sp'].shape}, {dataset[0]['nv_dp'].shape}")
-
-frame_id = 2345 # Set to None if you want to search by track_id only
-track_id = None  # Set to None if you want to search by frame_id only
-sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
-# ---- Prepare Model ----
-model = SDTATTModel(
-    input_dim=INPUT_DIM,
-    hidden_dim=HIDDEN_DIM,
-    num_neighbors=NUM_NEIGHBORS,
-    future_len=FUTURE_LEN
-).to(device)
-
-model.eval()
-
-# ---- Move data to device ----
-tv_hist = sample['tv_hist'].unsqueeze(0).to(device)  # shape: [1, T, 2]
-nv_sp = sample['nv_sp'].unsqueeze(0).to(device)      # shape: [1, N, T, 2]
-nv_dp = sample['nv_dp'].unsqueeze(0).to(device)      # shape: [1, N, T, 2]
-
-# ---- Inference ----
-with torch.no_grad():
-    output = model(tv_hist, nv_sp, nv_dp)  # shape: [1, future_len, 2]
-
-# Assume you have access to the last known position (e.g., from tv_hist)
-last_pos = tv_hist[0, -1]  # Shape: [2], last frame of history
-pred_rel = output[0]       # Shape: [30, 2] from model
-
-#
-print("Past vehcile Trajectory:")
-print(tv_hist.cpu().numpy())  # [T, 2]
-
-# Convert relative to absolute
-pred_abs = torch.cumsum(pred_rel, dim=0) + last_pos  # [30, 2]
-print("Absolute Predicted Future Trajectory:")
-print(pred_abs.cpu().numpy())  # [30, 2]    
+    print("Dataset details:")
+    print(f"Number of samples: {len(dataset)}")
+    print(f"Sample keys: {dataset[0].keys()}")  # Check keys in the first sample
+    print(f"Sample shape: {dataset[0]['tv_hist'].shape}, {dataset[0]['nv_sp'].shape}, {dataset[0]['nv_dp'].shape}")
 
 
+    #########################To predict a specific sample, set frame_id and track_id#########################
+    frame_id = 2345 # Set to None if you want to search by track_id only
+    track_id = None  # Set to None if you want to search by frame_id only
+
+    sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
+    # ---- Prepare Model ----
+    model = SDTATTModel(
+        input_dim=INPUT_DIM,
+        hidden_dim=HIDDEN_DIM,
+        num_neighbors=NUM_NEIGHBORS,
+        future_len=FUTURE_LEN
+    ).to(device)
+
+    model.eval()
+
+    # ---- Move data to device ----
+    tv_hist = sample['tv_hist'].unsqueeze(0).to(device)  # shape: [1, T, 2]
+    nv_sp = sample['nv_sp'].unsqueeze(0).to(device)      # shape: [1, N, T, 2]
+    nv_dp = sample['nv_dp'].unsqueeze(0).to(device)      # shape: [1, N, T, 2]
+
+    # ---- Inference ----
+    with torch.no_grad():
+        output = model(tv_hist, nv_sp, nv_dp)  # shape: [1, future_len, 2]
+
+    # Assume you have access to the last known position (e.g., from tv_hist)
+    last_pos = tv_hist[0, -1]  # Shape: [2], last frame of history
+    pred_rel = output[0]       # Shape: [30, 2] from model
+
+    #
+    print("Past vehcile Trajectory:")
+    print(tv_hist.cpu().numpy())  # [T, 2]
+
+    # Convert relative to absolute
+    pred_abs = torch.cumsum(pred_rel, dim=0) + last_pos  # [30, 2]
+    print("Absolute Predicted Future Trajectory:")
+    print(pred_abs.cpu().numpy())  # [30, 2]    
+
+    return pred_abs, sample['center_frame'], sample['tv_id']
+
+## Output predicted would be of a particular fram_id and track_id meaning the vehicle so that we can visualize it on the video
+
+pred_abs, center_frame, track_id = SDTATT_predict()
+# ---- Load Video and Get Properties ----
 import cv2
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -107,7 +118,7 @@ display_frame = cv2.resize(frame, (1024, 540))
 cv2.imshow(f"Prediction on Sample Frame No", display_frame)
 cv2.waitKey(0)  # Wait indefinitely until a key is pressed
 cv2.destroyAllWindows()
-video.release()
+video.release() 
 
 # ---- Write Output Video with Prediction Overlay ----
 video = cv2.VideoCapture(VIDEO_PATH)
