@@ -3,14 +3,16 @@ This project is part of CEN 300 course subject at the Civil Engineering departme
 
 LATEST UPDATE SDTATT +Lane Change + Conflict Zone Identification
 
-1. Trained yolov8 (already pretrained on drone video) on our video dataset with 200 annotated images. (Each image has more than 12 vehicles so took long time) 
+1. Trained yolov8 (already pretrained on drone video) on our video dataset with 200 annotated images, annotated on [Roboflow](https://app.roboflow.com/krish-sharma-koive/cen-300-object-detection/models) (Each image has more than 12 vehicles so took long time)
 2. Build codes of SDTATT model from this paper https://ieeexplore.ieee.org/document/10323306/the used Target vehicle, 5 neighboring vehicles and 20 past frames history x,y. Used BiLSTM and Spatial Temporal Attention layers to predict contextual target vehicle future maneuver.
 3. Now, once we have for each frame_id and vehicle_id  the future predicted trajectory, we perform lane change detection and conflict zone predictions. The lane change and conflict zone codes are also our own. 
-4. We have to perform inference now to test the pipeline and once we run it, we will have final data of { timestamp, conflict_x, conflict_y, list_of_vehicles_involved} and we'll plot the conflict zones on the video and we could then come to a conclusion of potential accident locations in the video
+4. We have to perform inference now to test the pipeline and once we run it, we will have final data of { timestamp, conflict_x, conflict_y, list_of_vehicles_involved} and we'll plot the conflict zones on the video and we could then come to a conclusion of potential accident locations in the video 
 
 ![sdtatt model](media/SDTATT.png)
 
 ![pipeline](https://github.com/AGAMPANDEYY/vehicle_trajectory_prediction/blob/main/media/traj-pred.png)
+
+### [Final Model](https://drive.google.com/file/d/1bQXITQd8x8w_fs8d6smq-UQoAaCWxfcx/view?usp=sharing)
 
 # Vehicle Trajectory Prediction
 
@@ -147,8 +149,6 @@ We welcome contributions from the community! To contribute, please follow these 
    git checkout -b feature-branch-name
    ```
 4. **Commit, Push and open a PR!**
-
-### Trained traffic_analysis supervision model on custom dataset annotated on [Roboflow](https://app.roboflow.com/krish-sharma-koive/cen-300-object-detection/models)
 
 ### License
 > [!NOTE]
