@@ -148,6 +148,8 @@ We welcome contributions from the community! To contribute, please follow these 
    ```
 4. **Commit, Push and open a PR!**
 
+### Trained traffic_analysis supervision model on custom dataset annotated on [Roboflow](https://app.roboflow.com/krish-sharma-koive/cen-300-object-detection/models)
+
 ### License
 > [!NOTE]
 > This project is licensed under the MIT License. See LICENSE for details.
