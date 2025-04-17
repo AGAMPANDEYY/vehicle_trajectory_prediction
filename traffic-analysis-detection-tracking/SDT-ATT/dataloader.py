@@ -18,15 +18,17 @@ class SDTATTDataset(Dataset):
         tv_hist = torch.tensor(sample['tv_hist'], dtype=torch.float32)       # [TH, 2]
         nv_sp = torch.tensor(sample['nv_sp'], dtype=torch.float32)          # [N, TH, 2]
         nv_dp = torch.tensor(sample['nv_dp'], dtype=torch.float32)          # [N, TH, 2]
+        nv_ids = torch.tensor(sample['nv_ids'], dtype=torch.int64)          # [N]
 
         return {
             'tv_hist': tv_hist,
             'nv_sp': nv_sp,
             'nv_dp': nv_dp,
             'center_frame': sample['center_frame'],
-            'tv_id': sample['tv_id']
+            'tv_id': sample['tv_id'], 
+            'nv_ids': nv_ids
+
         }
-    
     def get_sample_by_frame_and_track(self, frame_id=None, track_id=None):
         if track_id is None:
             for i in range(len(self.data)):

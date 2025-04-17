@@ -206,3 +206,210 @@ for frame, vehicle_list in time_dict.items():
 df_conflict = pd.DataFrame(conflict_events)
 df_conflict.to_csv(OUTPUT_CSV, index=False)
 print("Conflict events CSV saved at:", OUTPUT_CSV)
+
+
+import cv2
+import numpy as np
+import pandas as pd
+from collections import defaultdict
+from matplotlib import cm
+import os
+
+# Paths
+CONFLICT_CSV = OUTPUT_CSV  # From earlier step
+VIDEO_INPUT = r"C:\Agam\Work\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\data\output_video.mp4" #"data/output_SDTATT.mp4"
+VIDEO_OUTPUT = "data/video_with_conflicts.mp4"
+
+# Frame dimensions
+FRAME_WIDTH = 2046  # change based on your input video
+FRAME_HEIGHT = 1080
+
+tracked_csv_path = r"C:\Agam\Work\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\data\processed_combined_tracking_data.csv"
+tracked_csv=pd.read_csv(tracked_csv_path)
+
+def get_vehicles_in_frame(frame_idx, tracked_csv):
+    """
+    Retrieves vehicles present in a specific frame from tracking data.
+    
+    Args:
+        frame_idx (int): The frame number to retrieve vehicles for
+        tracked_csv (DataFrame): Pandas DataFrame containing vehicle tracking data
+        
+    Returns:
+        List of tuples, each containing (vehicle_id, (x, y, w, h))
+    """
+    # Filter the DataFrame for the specific frame
+    vehicles = tracked_csv[tracked_csv['frame_number'] == frame_idx]
+    
+    # Create a list of tuples in the format: (vehicle_id, (x, y, w, h))
+    vehicle_data = []
+    for _, vehicle in vehicles.iterrows():
+        vehicle_id = int(vehicle['vehicle_id'])
+        
+        # Calculate bounding box parameters
+        x1, y1 = float(vehicle['x1']), float(vehicle['y1'])
+        x2, y2 = float(vehicle['x2']), float(vehicle['y2'])
+        
+        # x, y are the top-left coordinates (not center)
+        x, y = x1, y1
+        
+        # Calculate width and height
+        w = x2 - x1
+        h = y2 - y1
+        
+        vehicle_data.append((vehicle_id, (int(x), int(y), int(w), int(h))))
+    
+    return vehicle_data
+
+
+
+# Load conflict data
+conflict_df = pd.read_csv(CONFLICT_CSV)
+
+# Build a frame-wise conflict heatmap dictionary
+conflict_map = defaultdict(list)
+# Track which vehicle IDs are involved in conflicts at each frame
+conflict_vehicle_ids = defaultdict(set)
+for _, row in conflict_df.iterrows():
+    frame = int(row['conflict_frame'])
+    x = int(row['conflict_x'])
+    y = int(row['conflict_y'])
+    conflict_map[frame].append((x, y))
+    # Extract vehicle IDs involved in this conflict
+    # Assuming 'track_ids' is stored as a string like "[1, 4, 5]" or as a list
+    if 'track_ids' in row:
+        if isinstance(row['track_ids'], str):
+            # Parse string representation of list
+            try:
+                vehicle_ids = eval(row['track_ids'])
+                for vid in vehicle_ids:
+                    conflict_vehicle_ids[frame].add(vid)
+            except:
+                # If string parsing fails, try comma-separated format
+                vehicle_ids = [int(id.strip()) for id in row['track_ids'].strip('[]').split(',')]
+                for vid in vehicle_ids:
+                    conflict_vehicle_ids[frame].add(vid)
+        elif isinstance(row['track_ids'], list):
+            # If already a list
+            for vid in row['track_ids']:
+                conflict_vehicle_ids[frame].add(vid)
+
+# Load video
+cap = cv2.VideoCapture(VIDEO_INPUT)
+fps = cap.get(cv2.CAP_PROP_FPS)
+frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+FRAME_HEIGHT= 480
+FRAME_WIDTH= 852
+
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+out = cv2.VideoWriter(VIDEO_OUTPUT, fourcc, fps, (FRAME_WIDTH, FRAME_HEIGHT))
+
+# Initialize an accumulated heatmap for the entire video
+accumulated_heatmap = np.zeros((480, 852), dtype=np.float32)
+
+# Conflict highlighting colors
+NORMAL_BOX_COLOR = (255, 255, 255)   # White for normal vehicles
+CONFLICT_BOX_COLOR = (0, 0, 255)     # Red for vehicles in conflict
+WARNING_BOX_COLOR = (0, 165, 255)    # Orange for vehicles approaching conflict
+
+with tqdm (total=frame_count, desc="Overlaying Conflict Zone Heatmap on video") as pbar:
+
+    # Loop through video frames
+    frame_idx = 0
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        height, width, channels = frame.shape
+        #print(f"Frame dimensions: Width={width}, Height={height}")
+
+        # Create a frame-specific heatmap based on actual frame dimensions
+        frame_heatmap = np.zeros((height, width), dtype=np.float32)
+
+        if frame_idx in conflict_map:
+            for (x, y) in conflict_map[frame_idx]:
+                # Ensure coordinates are within frame bounds
+                if 0 <= x < width and 0 <= y < height:
+                    # Create a larger Gaussian blob instead of a simple circle
+                    radius = 60  # Larger radius for better visibility
+                    sigma = radius / 3
+                    
+                    # Define region for Gaussian blob
+                    y_min = max(0, y - radius)
+                    y_max = min(height, y + radius + 1)
+                    x_min = max(0, x - radius)
+                    x_max = min(width, x + radius + 1)
+                    
+                    # Create y, x meshgrid for the region
+                    y_coords, x_coords = np.ogrid[y_min:y_max, x_min:x_max]
+                    
+                    # Calculate distance from center
+                    dist_sq = ((y_coords - y) ** 2 + (x_coords - x) ** 2)
+                    
+                    # Create Gaussian mask
+                    mask = np.exp(-dist_sq / (2 * sigma ** 2))
+                    
+                    # Add to frame heatmap
+                    frame_heatmap[y_min:y_max, x_min:x_max] += mask
+        
+        # Add frame heatmap to accumulated heatmap with decay factor
+        decay_factor = 0.95  # Reduces previous heatmap values
+        accumulated_heatmap = accumulated_heatmap * decay_factor + frame_heatmap
+        
+        # Normalize and convert to color heatmap for visualization
+        if np.max(accumulated_heatmap) > 0:
+            # Copy to avoid modifying the accumulated heatmap
+            vis_heatmap = accumulated_heatmap.copy()
+            
+            # Apply threshold to highlight more significant conflicts
+            threshold = np.max(vis_heatmap) * 0.1  # 10% of max value
+            vis_heatmap[vis_heatmap < threshold] = 0
+            
+            # Normalize to 0-255 range
+            cv2.normalize(vis_heatmap, vis_heatmap, 0, 255, cv2.NORM_MINMAX)
+            vis_heatmap = vis_heatmap.astype(np.uint8)
+            
+            # Apply colormap - JET provides good blue-to-red gradient
+            heatmap_color = cv2.applyColorMap(vis_heatmap, cv2.COLORMAP_JET)
+            
+            # Ensure heatmap matches frame dimensions
+            heatmap_color = cv2.resize(heatmap_color, (width, height))
+            
+            # Blend with original frame
+            overlayed = cv2.addWeighted(frame, 0.7, heatmap_color, 0.3, 0)
+        else:
+            overlayed = frame
+        
+        # NEW CODE: Highlight vehicles involved in conflicts
+        # This assumes you have vehicle detection/tracking data for each frame
+        # Assuming you have a function or data structure that gives you vehicle positions and IDs
+        # For example: vehicles = get_vehicles_in_frame(frame_idx)
+        
+        # Example implementation - replace with your actual vehicle tracking code
+        # For demonstration, I'll use placeholder code that assumes you have positions
+        vehicles_in_frame = get_vehicles_in_frame(frame_idx,tracked_csv)  # This is a placeholder function
+        
+        # Check each vehicle to see if it's involved in a conflict
+        for vehicle_id, (x, y, w, h) in vehicles_in_frame:
+            box_color = NORMAL_BOX_COLOR  # Default white box
+            label_text = f"ID:{vehicle_id}"
+            
+            # Check if this vehicle is involved in a conflict at this frame
+            if frame_idx in conflict_vehicle_ids and vehicle_id in conflict_vehicle_ids[frame_idx]:
+                box_color = CONFLICT_BOX_COLOR  # Red box for conflict vehicles
+                label_text = f"ID:{vehicle_id} [CONFLICT]"
+            
+            # Draw the bounding box with appropriate color
+            cv2.rectangle(overlayed, (x, y), (x + w, y + h), box_color, 2)
+            
+            # Add vehicle ID label
+            cv2.putText(overlayed, label_text, (x, y - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, box_color, 2)
+        
+        out.write(overlayed)
+        frame_idx += 1
+        pbar.update(1)
+cap.release()
+out.release()
+print(f"Video saved with conflict heatmap: {VIDEO_OUTPUT}")

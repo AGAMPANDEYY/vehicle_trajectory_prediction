@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 
 import cv2
+import csv
 import numpy as np
 from tqdm import tqdm
 from ultralytics import YOLO
@@ -126,6 +127,8 @@ class VideoProcessor:
             color=COLORS, position=sv.Position.CENTER, trace_length=100, thickness=2
         )
         self.detections_manager = DetectionsManager()
+        self.frame_number = 0
+
 
     def process_video(self):
         frame_generator = sv.get_video_frames_generator(
@@ -137,6 +140,7 @@ class VideoProcessor:
                 for frame in tqdm(frame_generator, total=self.video_info.total_frames):
                     annotated_frame = self.process_frame(frame)
                     sink.write_frame(annotated_frame)
+                    self.frame_number += 1
         else:
             for frame in tqdm(frame_generator, total=self.video_info.total_frames):
                 annotated_frame = self.process_frame(frame)
@@ -150,6 +154,7 @@ class VideoProcessor:
             df = pd.DataFrame(self.tracking_data)
             df.to_csv(self.output_csv_path, index=False)
             print(f"Tracking data saved to {self.output_csv_path}")
+
 
     def annotate_frame(
         self, frame: np.ndarray, detections: sv.Detections
@@ -198,16 +203,21 @@ class VideoProcessor:
         if len(detections) > 0:
             current_time = time.time() - self.start_time
             for tracker_id, xyxy in zip(detections.tracker_id, detections.xyxy):
-                x1, y1, x2, y2 = xyxy
-                center_x = (x1 + x2) / 2
-                center_y = (y1 + y2) / 2
-                
-                self.tracking_data.append({
-                    'timestamp': current_time,
-                    'tracker_id': tracker_id,
-                    'x': center_x,
-                    'y': center_y
-                })
+                    x1, y1, x2, y2 = xyxy
+                    center_x = (x1 + x2) / 2
+                    center_y = (y1 + y2) / 2
+
+                    self.tracking_data.append({
+                        'timestamp': current_time,
+                        'frame_number': self.frame_number,
+                        'vehicle_id': tracker_id,
+                        'x': center_x,
+                        'y': center_y,
+                        'x1': x1,
+                        'y1': y1,
+                        'x2': x2,
+                        'y2': y2
+                    })
 
         detections_in_zones = []
         detections_out_zones = []

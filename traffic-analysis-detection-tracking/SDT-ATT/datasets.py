@@ -9,19 +9,18 @@ from tqdm import tqdm
 
 
 #parameters 
-TH= 20 #time horizon ----> number of frames for history
-NF=10 #number of frames for future
+TH= 30 #time horizon ----> number of frames for history  video is of 30fps so 1 sec has 30 frames.
+NF=300 #number of frames for future
 MAX_NEIGHBORS=5 #max number of neighbors to consider for each TV
 
 #load data
 def load_data(csv_path):
     df=pd.read_csv(csv_path)
     # Generate frame_id by ranking unique timestamps
-    unique_timestamps = sorted(df['timestamp'].unique())
-    timestamp_to_frame = {ts: i for i, ts in enumerate(unique_timestamps)}
-    df['frame_id'] = df['timestamp'].map(timestamp_to_frame)
-
-    df = df.sort_values(by=['tracker_id', 'frame_id'])
+    #df = df.sort_values(by=['vehicle_id'])
+    print(df.head())
+    print("Total number of frames in the dataset: ", df['frame_number'].nunique())
+    #print(f" vehciles in frame 600", df[df['frame_number'] == 600]['vehicle_id'].unique())
     return df
 
 def extract_velocity(positions, timestamps):
@@ -41,11 +40,11 @@ def extract_velocity(positions, timestamps):
 def get_window_sequences(df):
     all_samples = []
 
-    grouped = df.groupby('tracker_id')
+    grouped = df.groupby('vehicle_id')
 
     # Build a dict: {track_id: list of (frame_id, x, y, timestamp)}
     track_data = {
-        tid: group[['frame_id','x', 'y', 'timestamp']].values.tolist()
+        tid: group[['frame_number','x', 'y', 'timestamp']].values.tolist()
         for tid, group in grouped
     }
 
@@ -60,16 +59,23 @@ def get_window_sequences(df):
             tv_velocities = extract_velocity(tv_positions, tv_timestamps)
 
             # Get NVs in the same center frame
-            nv_frame_data = df[df['frame_id'] == center_frame]
-            nv_frame_data = nv_frame_data[nv_frame_data['tracker_id'] != tid]
+            nv_frame_data = df[df['frame_number'] == center_frame]
+            nv_frame_data = nv_frame_data[nv_frame_data['vehicle_id'] != tid]
 
             # Sort neighbors by distance
             dists = np.linalg.norm(nv_frame_data[['x', 'y']].values - tv_positions[-1], axis=1)
             nearest_idxs = np.argsort(dists)[:MAX_NEIGHBORS]
-            selected_nv_ids = nv_frame_data.iloc[nearest_idxs]['tracker_id'].values
+            selected_nv_ids = nv_frame_data.iloc[nearest_idxs]['vehicle_id'].values
 
-            nv_sp = []
-            nv_dp = []
+            #print(f"TV ID: {tid}, Center Frame: {center_frame}, Neighbors: {selected_nv_ids}")
+
+
+            """
+            Only keep samples where ≥ 2 valid neighbors are found and Trajectory history is long enough >=TH
+            """
+            # Extract NV trajectories
+            valid_nv_sp = []
+            valid_nv_dp = []
 
             for nv_id in selected_nv_ids:
                 nv_traj = track_data.get(nv_id, [])
@@ -83,27 +89,27 @@ def get_window_sequences(df):
 
                     nv_vel = extract_velocity(nv_pos, nv_ts)
                     rel_pos = nv_pos - tv_positions  # spatial
-                    nv_sp.append(rel_pos)
-                    nv_dp.append(nv_vel)
-                else:
-                    nv_sp.append(np.zeros((TH, 2)))
-                    nv_dp.append(np.zeros((TH, 2)))
+                    valid_nv_sp.append(rel_pos)
+                    valid_nv_dp.append(nv_vel)
 
-            # pad if less than MAX_NEIGHBORS
-            while len(nv_sp) < MAX_NEIGHBORS:
-                nv_sp.append(np.zeros((TH, 2)))
-                nv_dp.append(np.zeros((TH, 2)))
+            # Only keep samples where ≥ 2 valid neighbors are found
+            if len(valid_nv_sp) >= 2:
+                # Pad if less than MAX_NEIGHBORS
+                while len(valid_nv_sp) < MAX_NEIGHBORS:
+                    valid_nv_sp.append(np.zeros((TH, 2)))
+                    valid_nv_dp.append(np.zeros((TH, 2)))
 
-            sample = {
-                'tv_hist': tv_positions,             # (TH, 2)
-                'tv_vel': tv_velocities,             # (TH, 2)
-                'nv_sp': np.array(nv_sp),            # (N, TH, 2)
-                'nv_dp': np.array(nv_dp),            # (N, TH, 2)
-                'center_frame': center_frame,
-                'tv_id': tid
-            }
+                sample = {
+                    'tv_id': tid,
+                    'nv_ids': selected_nv_ids,   # still useful for metadata
+                    'tv_hist': tv_positions,
+                    'tv_vel': tv_velocities,
+                    'nv_sp': np.array(valid_nv_sp),
+                    'nv_dp': np.array(valid_nv_dp),
+                    'center_frame': center_frame
+                }
 
-            all_samples.append(sample)
+                all_samples.append(sample)
 
     return all_samples
 
@@ -112,7 +118,7 @@ if __name__ == "__main__":
     import os 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     PARENT_DIR = os.path.dirname(BASE_DIR)
-    csv_path= os.path.join(PARENT_DIR,"data", "tracking_data.csv")
+    csv_path= os.path.join(PARENT_DIR,"data", "processed_combined_tracking_data.csv")
     df = load_data(csv_path)
     dataset = get_window_sequences(df)
 

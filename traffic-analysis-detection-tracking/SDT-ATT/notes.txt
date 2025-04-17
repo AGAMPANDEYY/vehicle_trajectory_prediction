@@ -1,4 +1,20 @@
-1. Run datasets.py to convert csv to npy with format  
+0. video to csv code is at main.py in outside folder at traffic-analysis-detection-tracking\main.py
+
+Running Main.py
+
+cd traffic-analysis-detection-tracking/trajectory_prediction_mdels
+
+python main.py \
+    --source_weights_path data/traffic_analysis.pt \
+    --source_video_path data/0212.mp4 \
+    --target_video_path data/output_video.mp4 \
+    --lstm_model_path trajectory_prediction_models/deep_learning_based/trajectory_predictor.pth
+
+1. Convert output csv to processed csv for SDTATT at traffic-analysis-detection-tracking\process_combineddata.py
+
+python process_combineddata.py
+
+2. Run datasets.py to convert csv to npy with format  
             {
                 'tv_hist': tv_positions,             # (TH, 2)
                 'tv_vel': tv_velocities,             # (TH, 2)
@@ -10,11 +26,11 @@
 
 python traffic-analysis-detection-tracking/SDTATT/datasets.py
 
-2. Dataloader.py class SDTATTDataset loads the .npy file and creates tensor of each key 
+3. Dataloader.py class SDTATTDataset loads the .npy file and creates tensor of each key 
 
-3. model.py has the model SDTATT
+4. model.py has the model SDTATT
 
-4. eval.py runs the pipeline, makes prediction and overlays the prediction of target vehicle on the video
+5. eval.py runs the pipeline, makes prediction and overlays the prediction of target vehicle on the video
 
 USER@DESKTOP-9HMMGG6 MINGW64 /c/Agam/Work/vehicle_trajectory_prediction (main)
 python traffic-analysis-detection-tracking/SDT-ATT/eval.py

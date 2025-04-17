@@ -10,3 +10,5 @@ venv/
 vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/output_video.mp4/
 vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/0212.mp4
 vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/traffic_analysis.pt
+traffic-analysis-detection-tracking/data
+traffic-analysis-detection-tracking/SDT-ATT/data

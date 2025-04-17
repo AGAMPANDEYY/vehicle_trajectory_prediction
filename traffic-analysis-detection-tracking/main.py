@@ -99,7 +99,23 @@ class VideoProcessor:
         if self.tracking_data:
             df = pd.DataFrame(self.tracking_data)
             output_csv = os.path.join(os.path.dirname(self.target_video_path), 'combined_tracking_data.csv')
-            df.to_csv(output_csv, index=False)
+            
+            df_processed = df.copy()
+            df_processed= df_processed[df_processed['prediction_type'] == 'actual']
+
+            df_processed=df_processed.drop(columns=['prediction_type', 'sequence_index'])
+
+            df_processed['frame_number'] = df_processed['frame_number'].astype(int)
+            df_processed['timestamp']= df_processed['timestamp']
+            df_processed['tracker_id'] = df_processed['tracker_id'].astype(int)
+            df_processed['x'] = df_processed['x'].astype(float)
+            df_processed['y'] = df_processed['y'].astype(float)
+            df_processed['x1'] = df_processed['x1'].astype(float)
+            df_processed['y1'] = df_processed['y1'].astype(float)
+            df_processed['x2'] = df_processed['x2'].astype(float)
+            df_processed['y2'] = df_processed['y2'].astype(float)
+            
+            df_processed.to_csv(output_csv, index=False)
             print(f"✓ Combined tracking data saved to {output_csv}")
             print(f"✓ Total data points saved: {len(df)}")
         else:
@@ -310,7 +326,7 @@ def main():
     processor.process_video()
     print("\n=== Processing Complete! ===")
     print(f"✓ Output video saved to: {args.target_video_path}")
-    print(f"✓ Tracking data saved to: {os.path.join(os.path.dirname(args.target_video_path), 'combined_tracking_data.csv')}")
+    print(f"✓ Tracking data saved to: {os.path.join(os.path.dirname(args.target_video_path), 'processed_combined_tracking_data.csv')}")
 
 if __name__ == "__main__":
     main() 

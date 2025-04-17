@@ -1,5 +1,8 @@
 """
+Steps to convert Video to csv detection tracking and prediction for KALMAN and LSTM predictions
 
+1. Run main.py 
+2. run process_combineddata.py 
 """
 
 (venv_cen) 
@@ -20,3 +23,24 @@ $ python main.py \
     --source_video_path data/0212.mp4 \
     --target_video_path data/output_video.mp4 \
     --lstm_model_path trajectory_prediction_models/deep_learning_based/trajectory_predictor.pth
+
+
+python main.py \
+    --source_weights_path data/best.pt \
+    --source_video_path data/0212_cropped.mp4 \
+    --target_video_path data/output_video.mp4 \
+    --lstm_model_path trajectory_prediction_models/deep_learning_based/trajectory_predictor.pth
+
+
+
+############# FOR DETECTION AND TRACKING ONLY #####################
+
+USER@DESKTOP-9HMMGG6 MINGW64 /c/Agam/Work/vehicle_trajectory_prediction/traffic-analysis-detection-tracking (main)
+$ python ultralytics_example.py     --source_weights_path data/best.pt     --source_video_path data/0212_cropped.mp4     --target_video_path data/output_video.mp4  --output_csv_pat
+h data/processed_combined_tracking_data.csv
+
+
+###################################2#############################
+
+USER@DESKTOP-9HMMGG6 MINGW64 /c/Agam/Work/vehicle_trajectory_prediction/traffic-analysis-detection-tracking (main)
+$ python process_combineddata.py

@@ -101,6 +101,7 @@ class VideoProcessor:
             color=COLORS, position=sv.Position.CENTER, trace_length=100, thickness=2
         )
         self.detections_manager = DetectionsManager()
+        self.output_rows = []
 
     def process_video(self):
         frame_generator = sv.get_video_frames_generator(
@@ -119,6 +120,7 @@ class VideoProcessor:
                 if cv2.waitKey(1) & 0xFF == ord("q"):
                     break
             cv2.destroyAllWindows()
+        self.save_output_csv()
 
     def annotate_frame(
         self, frame: np.ndarray, detections: sv.Detections
@@ -154,7 +156,7 @@ class VideoProcessor:
                     )
 
         return annotated_frame
-
+   
     def process_frame(self, frame: np.ndarray) -> np.ndarray:
         results = self.model.infer(
             frame, confidence=self.conf_threshold, iou_threshold=self.iou_threshold
@@ -162,6 +164,15 @@ class VideoProcessor:
         detections = sv.Detections.from_inference(results)
         detections.class_id = np.zeros(len(detections))
         detections = self.tracker.update_with_detections(detections)
+        frame_number = self.video_info.frame_number
+        timestamp = self.frame_number / self.video_info.fps
+        for i in range(len(detections)):
+            tracker_id = detections.tracker_id[i]
+            x1, y1, x2, y2 = detections.xyxy[i]
+            x = (x1 + x2) / 2
+            y = (y1 + y2) / 2
+            self.csv_writer.writerow([timestamp, self.frame_number, tracker_id, x, y, x1, y1, x2, y2])
+        self.frame_number += 1
 
         detections_in_zones = []
         detections_out_zones = []
@@ -176,6 +187,13 @@ class VideoProcessor:
             detections, detections_in_zones, detections_out_zones
         )
         return self.annotate_frame(frame, detections)
+    
+    def save_output_csv(self, output_path="detections_output.csv"):
+        with open(output_path, mode='w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["timestamp", "frame_number", "vehicle_id", "x", "y", "x1", "y1", "x2", "y2"])
+            writer.writerows(self.output_rows)
+
 
 
 if __name__ == "__main__":
