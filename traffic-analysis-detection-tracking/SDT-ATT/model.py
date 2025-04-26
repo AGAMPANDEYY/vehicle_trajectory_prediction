@@ -89,7 +89,7 @@ class SDTATTModel(nn.Module):
 
     def forward(self, tv_hist, nv_sp, nv_dp):
         """
-        tv_hist:     [B, T, 2]
+        tv_hist:     [B, T, 2]  
         nv_sp:       [B, N, T, 2]
         nv_dp:       [B, N, T, 2]
         """
