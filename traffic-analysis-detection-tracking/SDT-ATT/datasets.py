@@ -9,9 +9,9 @@ from tqdm import tqdm
 
 
 #parameters 
-TH= 30 #time horizon ----> number of frames for history  video is of 30fps so 1 sec has 30 frames.
-NF=300 #number of frames for future
-MAX_NEIGHBORS=5 #max number of neighbors to consider for each TV
+TH= 90 #time horizon ----> number of frames for history  video is of 30fps so 1 sec has 30 frames.
+NF=120 #number of frames for future
+MAX_NEIGHBORS=3 #max number of neighbors to consider for each TV in 2-lane double direction scenario
 
 #load data
 def load_data(csv_path):
@@ -40,7 +40,7 @@ def extract_velocity(positions, timestamps):
 def get_window_sequences(df):
     all_samples = []
 
-    grouped = df.groupby('vehicle_id')
+    grouped = df.groupby('tracker_id')
 
     # Build a dict: {track_id: list of (frame_id, x, y, timestamp)}
     track_data = {
@@ -60,13 +60,23 @@ def get_window_sequences(df):
 
             # Get NVs in the same center frame
             nv_frame_data = df[df['frame_number'] == center_frame]
-            nv_frame_data = nv_frame_data[nv_frame_data['vehicle_id'] != tid]
+            nv_frame_data = nv_frame_data[nv_frame_data['tracker_id'] != tid]
+
 
             # Sort neighbors by distance
             dists = np.linalg.norm(nv_frame_data[['x', 'y']].values - tv_positions[-1], axis=1)
-            nearest_idxs = np.argsort(dists)[:MAX_NEIGHBORS]
-            selected_nv_ids = nv_frame_data.iloc[nearest_idxs]['vehicle_id'].values
 
+            # Create a DataFrame with distances and IDs
+            dist_df = pd.DataFrame({
+                'tracker_id': nv_frame_data['tracker_id'].values,
+                'distance': dists
+            })
+            
+            # Group by tracker_id and take the minimum distance for each vehicle
+            dist_df = dist_df.groupby('tracker_id').min().reset_index()
+            
+            # Sort by distance and select top MAX_NEIGHBORS unique vehicles
+            selected_nv_ids = dist_df.sort_values('distance')['tracker_id'].values[:MAX_NEIGHBORS]
             #print(f"TV ID: {tid}, Center Frame: {center_frame}, Neighbors: {selected_nv_ids}")
 
 
@@ -118,7 +128,7 @@ if __name__ == "__main__":
     import os 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     PARENT_DIR = os.path.dirname(BASE_DIR)
-    csv_path= os.path.join(PARENT_DIR,"data", "processed_combined_tracking_data.csv")
+    csv_path= os.path.join(PARENT_DIR,"data", "combined_tracking_data.csv")
     df = load_data(csv_path)
     dataset = get_window_sequences(df)
 

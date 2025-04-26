@@ -19,6 +19,24 @@ class SDTATTDataset(Dataset):
         nv_sp = torch.tensor(sample['nv_sp'], dtype=torch.float32)          # [N, TH, 2]
         nv_dp = torch.tensor(sample['nv_dp'], dtype=torch.float32)          # [N, TH, 2]
         nv_ids = torch.tensor(sample['nv_ids'], dtype=torch.int64)          # [N]
+        
+        # Calculate direction vector for 2-lane double direction
+        # Direction is determined by the movement of the target vehicle
+        if 'tv_vel' in sample and len(sample['tv_vel']) > 0:
+            # Use the average velocity as direction
+            direction = np.mean(sample['tv_vel'], axis=0)
+            # Normalize the direction vector
+            norm = np.linalg.norm(direction)
+            if norm > 0:
+                direction = direction / norm
+            else:
+                # Default direction if no movement
+                direction = np.array([1.0, 0.0])  # Default to right direction
+        else:
+            # Default direction if no velocity data
+            direction = np.array([1.0, 0.0])  # Default to right direction
+            
+        direction = torch.tensor(direction, dtype=torch.float32)  # [2]
 
         return {
             'tv_hist': tv_hist,
@@ -26,8 +44,8 @@ class SDTATTDataset(Dataset):
             'nv_dp': nv_dp,
             'center_frame': sample['center_frame'],
             'tv_id': sample['tv_id'], 
-            'nv_ids': nv_ids
-
+            'nv_ids': nv_ids,
+            'direction': direction
         }
     def get_sample_by_frame_and_track(self, frame_id=None, track_id=None):
         if track_id is None:

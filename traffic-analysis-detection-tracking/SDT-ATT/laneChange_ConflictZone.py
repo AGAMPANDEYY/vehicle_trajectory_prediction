@@ -263,6 +263,11 @@ def get_vehicles_in_frame(frame_idx, tracked_csv):
 
 
 
+
+# ==========================================#
+# OVERLAYING CONFLICT ZONE HEATMAP ON Video #
+# ==========================================#
+
 # Load conflict data
 conflict_df = pd.read_csv(CONFLICT_CSV)
 

@@ -15,7 +15,7 @@ import os
 BATCH_SIZE = 1
 INPUT_DIM = 2
 HIDDEN_DIM = 64
-NUM_NEIGHBORS = 5  # Change according to your dataset Curreent numpy from datasets.py has 5 neighbors
+NUM_NEIGHBORS = 3  # Change according to your dataset Curreent numpy from datasets.py has 5 neighbors
 FUTURE_LEN = 300    #30 frames is only 1sec and let us try for 5sec so we can set it to 150 frames
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -37,8 +37,9 @@ print(f"Sample shape: {dataset[0]['tv_hist'].shape}, {dataset[0]['nv_sp'].shape}
 
 
 #########################To predict a specific sample, set frame_id and track_id#########################
-frame_id = None # Set to None if you want to search by track_id only
-track_id = 293  # Set to None if you want to search by frame_id only
+frame_id = 238 # Set to None if you want to search by track_id only
+track_id = 8
+  # Set to None if you want to search by frame_id only
 
 
 """
@@ -110,7 +111,7 @@ import cv2
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASE_DIR)
-VIDEO_PATH = os.path.join(PARENT_DIR, "data", "0212_cropped.mp4")  # update if needed
+VIDEO_PATH = os.path.join(PARENT_DIR, "data", "Lane_C_Video.mp4")  # update if needed
 
 # ---- Load Video and Get Properties ----
 cap = cv2.VideoCapture(VIDEO_PATH)
@@ -129,7 +130,7 @@ cap.release()
 # Process frame with YOLO
 import supervision as sv
 from ultralytics import YOLO
-source_weights_path= r"C:\Agam\Work\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\data\best.pt"
+source_weights_path= r"D:\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\data\best.pt"
 tracker= sv.ByteTrack()
 conf_threshold = 0.2
 iou_threshold = 0.5
@@ -167,7 +168,7 @@ frame_idx = 0
 
 # Output video writer - write only FUTURE_LEN frames
 out = cv2.VideoWriter(
-    r"C:\Agam\Work\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\SDT-ATT\data\output_SDTATT.mp4",
+    r"D:\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\data\output_SDTATT1.mp4",
     cv2.VideoWriter_fourcc(*"mp4v"),
     fps,
     (width, height)
@@ -321,6 +322,4 @@ while video.isOpened():
 video.release()
 out.release()
 print("Short trajectory video saved!")
-
-
 
