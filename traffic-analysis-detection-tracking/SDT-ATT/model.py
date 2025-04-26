@@ -1,6 +1,4 @@
 
-####2####
-
 import torch 
 import torch.nn as nn 
 import torch.nn.functional as F
@@ -53,7 +51,7 @@ class SpattialDynamicAttention(nn.Module):
     
 #CHGNAGE NUMBER OF NEIGHBORS ACCORDINGLY 
 class SDTATTModel(nn.Module):
-    def __init__(self, input_dim=2, hidden_dim=64, num_neighbors=5, future_len=30):
+    def __init__(self, input_dim=2, hidden_dim=64, num_neighbors=3, future_len=30):
        super(SDTATTModel,self).__init__()
        self.num_neighbors=num_neighbors
        self.future_len=future_len
@@ -75,6 +73,10 @@ class SDTATTModel(nn.Module):
        self.nv_spatial_fc=nn.Linear(hidden_dim*2*num_neighbors, hidden_dim)
        self.nv_dynamic_fc=nn.Linear(hidden_dim*2*num_neighbors, hidden_dim)
 
+       #Direction-aware component for 2-lane double direction
+       self.direction_encoder = nn.Linear(2, hidden_dim)  # Encode direction information
+       self.direction_fusion = nn.Linear(hidden_dim*4, hidden_dim)  # Fuse direction with other features
+
        #Fully Connected layer plus fusion and decoder
 
        self.fc_fusion=nn.Sequential(
@@ -87,20 +89,19 @@ class SDTATTModel(nn.Module):
        self.decoder=nn.LSTM(hidden_dim, hidden_dim, batch_first=True)
        self.output= nn.Linear(hidden_dim, 2) #predicts x,y of TV
 
-    def forward(self, tv_hist, nv_sp, nv_dp):
+    def forward(self, tv_hist, nv_sp, nv_dp, direction=None):
         """
         tv_hist:     [B, T, 2]
         nv_sp:       [B, N, T, 2]
         nv_dp:       [B, N, T, 2]
+        direction:   [B, 2] - Optional direction vector (e.g., [1,0] for right, [-1,0] for left)
         """
 
-        B, N,T, _ = nv_sp.shape
+        B, N, T, _ = nv_sp.shape
 
-        #Encode tarfet vehicle TV
-
+        #Encode target vehicle TV
         tv_feat= self.tv_encoder(tv_hist)
         tv_att=self.temporal_attention(tv_feat)
-
 
         #encode neighbors (spatial and dynamic)
         nv_sp_encoded= self.nv_spatial_encoder(nv_sp.view(B * N, T, 2)).view(B, N, T, -1)
@@ -118,9 +119,18 @@ class SDTATTModel(nn.Module):
         nv_sp_att_fc= self.nv_spatial_fc(nv_sp_att.view(B,-1))
         nv_dp_att_fc= self.nv_dynamic_fc(nv_dp_att.view(B,-1))
 
-        #flatten Concat and fuse
-        fused = torch.cat([tv_att_fc, nv_sp_att_fc.view(B, -1), nv_dp_att_fc.view(B, -1)], dim=-1)
-        fused = self.fc_fusion(fused).unsqueeze(1).repeat(1, self.future_len, 1)
+        # Process direction information if provided
+        if direction is not None:
+            direction_feat = self.direction_encoder(direction)
+            # Fuse direction with other features
+            fused = torch.cat([tv_att_fc, nv_sp_att_fc.view(B, -1), nv_dp_att_fc.view(B, -1), direction_feat], dim=-1)
+            fused = self.direction_fusion(fused)
+        else:
+            # Original fusion without direction
+            fused = torch.cat([tv_att_fc, nv_sp_att_fc.view(B, -1), nv_dp_att_fc.view(B, -1)], dim=-1)
+            fused = self.fc_fusion(fused)
+            
+        fused = fused.unsqueeze(1).repeat(1, self.future_len, 1)
 
         # Decode trajectory
         decoded, _ = self.decoder(fused)

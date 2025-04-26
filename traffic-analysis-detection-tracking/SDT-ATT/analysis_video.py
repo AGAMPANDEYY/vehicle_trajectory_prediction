@@ -8,7 +8,7 @@
 import cv2
 
 # Load video
-video_path = r'C:\Agam\Work\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\data\0212.mp4'
+video_path = r'D:\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\data\0212.mp4'
 cap = cv2.VideoCapture(video_path)
 
 # Check if video opened successfully

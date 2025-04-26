@@ -326,7 +326,7 @@ def main():
     processor.process_video()
     print("\n=== Processing Complete! ===")
     print(f"✓ Output video saved to: {args.target_video_path}")
-    print(f"✓ Tracking data saved to: {os.path.join(os.path.dirname(args.target_video_path), 'processed_combined_tracking_data.csv')}")
+    print(f"✓ Tracking data saved to: {os.path.join(os.path.dirname(args.target_video_path), 'combined_tracking_data.csv')}")
 
 if __name__ == "__main__":
     main() 

@@ -1,7 +1,7 @@
 import numpy as np
 
 # Load the raw npy file directly
-data = np.load(r"C:\Agam\Work\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\SDT-ATT\data\sdtatt_data.npy", allow_pickle=True)
+data = np.load(r"D:\vehicle_trajectory_prediction\traffic-analysis-detection-tracking\SDT-ATT\data\sdtatt_data.npy", allow_pickle=True)
 
 # Collect unique frame IDs and track IDs
 unique_frames = set()
