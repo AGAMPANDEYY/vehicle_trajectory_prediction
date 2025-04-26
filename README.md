@@ -1,7 +1,23 @@
 # vehicle_trajectory_prediction
 This project is part of CEN 300 course subject at the Civil Engineering department IIT Roorkee for Pre-Final year students.
 
-LATEST UPDATE SDTATT +Lane Change + Conflict Zone Identification mapped on Video
+---
+
+# Quantifying near-miss interactions at conflict zones using Post-Encroachment Time (PET)
+
+![image](https://github.com/user-attachments/assets/273fad60-113c-45e9-ba69-6e2096c2aaad)
+
+### Inputs:
+
+- Vehicle tracking data: per-frame central coordinates and bounding boxes.
+- Conflict zone annotations (14 zones) created using VIA Annotator.
+- Trimmed 45-second traffic video dataset.
+
+### Overlaid PET valus and risk labels on the video
+
+https://github.com/user-attachments/assets/eb17b9f0-7960-4053-84fb-707d5f0edcb4
+
+# SDTATT +Lane Change + Conflict Zone Identification mapped on Video
 
 ![image](https://github.com/user-attachments/assets/c5e573b3-7d59-43aa-8d58-40d467a05016)
 
