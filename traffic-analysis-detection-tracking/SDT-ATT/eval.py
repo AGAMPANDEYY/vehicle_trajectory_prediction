@@ -18,12 +18,13 @@ BATCH_SIZE = 1
 INPUT_DIM = 2
 HIDDEN_DIM = 64
 NUM_NEIGHBORS = 3
-FUTURE_LEN = 300
+FUTURE_LEN = 90
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASE_DIR)
 N_DATA_PATH = os.path.join(BASE_DIR, "data", "sdtatt_data.npy")
 TRACKING_CSV_PATH = os.path.join(PARENT_DIR, "data", "combined_tracking_data.csv")
+CHECKPOINT_PATH=os.path.join(BASE_DIR, "ckpt.pt")
 
 # Load tracking data
 tracking_df = pd.read_csv(TRACKING_CSV_PATH)
@@ -63,6 +64,7 @@ def SDTATT_predict():
         num_neighbors=NUM_NEIGHBORS,
         future_len=FUTURE_LEN
     ).to(device)
+    model.load_state_dict(torch.load(CHECKPOINT_PATH))
     model.eval()
     tv_hist = sample['tv_hist'].numpy()
     nv_sp = sample['nv_sp'].numpy()
