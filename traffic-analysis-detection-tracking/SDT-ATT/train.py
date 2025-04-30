@@ -86,6 +86,7 @@ def train():
 
     # 4) Training loop
     for epoch in tqdm(range(1, EPOCHS + 1), desc="Epochs"):
+        start_time = time.time()
         model.train()
         total_loss = 0.0
         for batch in train_loader:
