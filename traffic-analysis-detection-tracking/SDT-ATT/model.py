@@ -91,7 +91,7 @@ class SDTATTModel(nn.Module):
 
     def forward(self, tv_hist, nv_sp, nv_dp, direction=None):
         """
-        tv_hist:     [B, T, 2]
+        tv_hist:     [B, T, 2]  
         nv_sp:       [B, N, T, 2]
         nv_dp:       [B, N, T, 2]
         direction:   [B, 2] - Optional direction vector (e.g., [1,0] for right, [-1,0] for left)

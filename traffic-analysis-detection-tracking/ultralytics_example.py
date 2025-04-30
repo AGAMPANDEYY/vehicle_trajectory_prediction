@@ -198,10 +198,9 @@ class VideoProcessor:
         detections = sv.Detections.from_ultralytics(results)
         detections.class_id = np.zeros(len(detections))
         detections = self.tracker.update_with_detections(detections)
-
+        current_time=self.frame_number/self.video_info.fps 
         # Store tracking data for each detection
         if len(detections) > 0:
-            current_time = time.time() - self.start_time
             for tracker_id, xyxy in zip(detections.tracker_id, detections.xyxy):
                     x1, y1, x2, y2 = xyxy
                     center_x = (x1 + x2) / 2
