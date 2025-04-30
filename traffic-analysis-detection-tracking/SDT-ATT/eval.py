@@ -82,9 +82,9 @@ def SDTATT_predict():
         output = model(tv_hist, nv_sp, nv_dp)
     
     # Denormalize the output
-    pred_rel = output[0]
+    pred_rel = output[0, :, :2]   # μₓ,μᵧ
     #pred_abs=torch.cumsum(pred_rel*tv_std+tv_mean,dim=0)+tv_hist[0,-1]
-    pred_abs = torch.cumsum(pred_rel,dim=0)+tv_hist[0,-1]
+    pred_abs = torch.cumsum(pred_rel, dim=0) + tv_hist[0, -1]
     
     return pred_abs, sample['center_frame'], sample['tv_id']
 
