@@ -45,7 +45,9 @@ class SDTATTDataset(Dataset):
             'center_frame': sample['center_frame'],
             'tv_id': sample['tv_id'], 
             'nv_ids': nv_ids,
-            'direction': direction
+            'direction': direction, 
+            'tv_fut': tv_fut,   
+            'tv_fut_rel': tv_fut_rel
         }
     def get_sample_by_frame_and_track(self, frame_id=None, track_id=None):
         if track_id is None:
