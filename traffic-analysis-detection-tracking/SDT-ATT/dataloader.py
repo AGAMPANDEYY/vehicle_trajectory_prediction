@@ -19,6 +19,9 @@ class SDTATTDataset(Dataset):
         nv_sp = torch.tensor(sample['nv_sp'], dtype=torch.float32)          # [N, TH, 2]
         nv_dp = torch.tensor(sample['nv_dp'], dtype=torch.float32)          # [N, TH, 2]
         nv_ids = torch.tensor(sample['nv_ids'], dtype=torch.int64)          # [N]
+        tv_fut = torch.tensor(sample['tv_fut'], dtype=torch.int64)         #[N, NF, 2]
+        tv_fut_rel = torch.tensor(sample['tv_fut_rel'], dtype=torch.int64) 
+        
         
         # Calculate direction vector for 2-lane double direction
         # Direction is determined by the movement of the target vehicle
