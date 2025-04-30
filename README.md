@@ -5,7 +5,8 @@ This project is part of CEN 300 course subject at the Civil Engineering departme
 
 # Quantifying near-miss interactions at conflict zones using Post-Encroachment Time (PET)
 
-![image](https://github.com/user-attachments/assets/273fad60-113c-45e9-ba69-6e2096c2aaad)
+![image](https://github.com/user-attachments/assets/c079b9cf-10e7-426a-8e9e-185a2952bce4)
+
 
 ### Inputs:
 
