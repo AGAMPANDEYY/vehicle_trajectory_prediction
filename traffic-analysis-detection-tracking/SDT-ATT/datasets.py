@@ -36,7 +36,6 @@ def extract_velocity(positions, timestamps):
     velocities.insert(0, velocities[0])  # repeat first velocity
     return np.array(velocities)
 
-
 def get_window_sequences(df):
     all_samples = []
 
@@ -62,14 +61,22 @@ def get_window_sequences(df):
             nv_frame_data = df[df['frame_number'] == center_frame]
             nv_frame_data = nv_frame_data[nv_frame_data['tracker_id'] != tid]
 
-
-            # Sort neighbors by distance
-            dists = np.linalg.norm(nv_frame_data[['x', 'y']].values - tv_positions[-1], axis=1)
-
+            # Calculate relative positions and distances
+            tv_current_pos = tv_positions[-1]  # Current position of target vehicle
+            nv_positions = nv_frame_data[['x', 'y']].values
+            
+            # Calculate relative positions
+            rel_positions = nv_positions - tv_current_pos
+            
+            # Calculate distances
+            dists = np.linalg.norm(rel_positions, axis=1)
+            
             # Create a DataFrame with distances and IDs
             dist_df = pd.DataFrame({
                 'tracker_id': nv_frame_data['tracker_id'].values,
-                'distance': dists
+                'distance': dists,
+                'relative_x': rel_positions[:, 0],
+                'relative_y': rel_positions[:, 1]
             })
             
             # Group by tracker_id and take the minimum distance for each vehicle
@@ -77,12 +84,7 @@ def get_window_sequences(df):
             
             # Sort by distance and select top MAX_NEIGHBORS unique vehicles
             selected_nv_ids = dist_df.sort_values('distance')['tracker_id'].values[:MAX_NEIGHBORS]
-            #print(f"TV ID: {tid}, Center Frame: {center_frame}, Neighbors: {selected_nv_ids}")
-
-
-            """
-            Only keep samples where ≥ 2 valid neighbors are found and Trajectory history is long enough >=TH
-            """
+            
             # Extract NV trajectories
             valid_nv_sp = []
             valid_nv_dp = []
@@ -111,7 +113,7 @@ def get_window_sequences(df):
 
                 sample = {
                     'tv_id': tid,
-                    'nv_ids': selected_nv_ids,   # still useful for metadata
+                    'nv_ids': selected_nv_ids,
                     'tv_hist': tv_positions,
                     'tv_vel': tv_velocities,
                     'nv_sp': np.array(valid_nv_sp),
@@ -133,6 +135,6 @@ if __name__ == "__main__":
     dataset = get_window_sequences(df)
 
     # Save as numpy
-    np.save("sdtatt_data.npy", dataset)
+    np.save(os.path.join(BASE_DIR, "data", "sdtatt_data.npy"), dataset)
     print(f"Processed {len(dataset)} samples.")
 
