@@ -10,7 +10,7 @@ from dataloader import SDTATTDataset
 
 BASE_DIR=os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "data", "sdtatt_data.npy")
-DATA_PATH="/kaggle/input/sdtatt-numpy/sdtatt_data.npy"
+DATA_PATH="/kaggle/input/sdtatt-np/sdtatt_data.npy"
 BATCH_SIZE = 128
 LR = 1e-3
 EPOCHS = 50
