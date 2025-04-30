@@ -1,6 +1,7 @@
 import os
 import math
 import torch
+import csv
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 from model import SDTATTModel
@@ -72,6 +73,13 @@ def train():
     model.to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
+    # 3) Setup CSV logger
+    metrics_path = os.path.join(BASE_DIR, "metrics.csv")
+    os.makedirs(os.path.dirname(metrics_path), exist_ok=True)
+    csv_file = open(metrics_path, 'w', newline='')
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['epoch', 'train_loss', 'val_loss', 'epoch_time'])
+
     # 3) (Optional) load means/stds if dataset normalizes inside
     # tv_mean, tv_std = full_dataset.tv_mean.to(DEVICE), full_dataset.tv_std.to(DEVICE)
 
@@ -106,18 +114,25 @@ def train():
                 output = model(tv_hist, nv_sp, nv_dp)
                 val_loss += gaussian_nll_loss(output, tv_fut).item() * tv_hist.size(0)
         avg_val_loss = val_loss / val_size
+        epoch_time = time.time() - start_time
 
-        print(f"Epoch {epoch}/{EPOCHS}  Train Loss: {avg_train_loss:.4f}  Val Loss: {avg_val_loss:.4f}")
+        # Log metrics
+        csv_writer.writerow([epoch, avg_train_loss, avg_val_loss, epoch_time])
+        csv_file.flush()
+
+        print(f"Epoch {epoch}/{EPOCHS}  Train Loss: {avg_train_loss:.4f}  Val Loss: {avg_val_loss:.4f}  Time: {epoch_time:.1f}s")
 
         # Save checkpoint every few epochs
         if epoch % 10 == 0:
-            ckpt_path = f"checkpoints/sdtatt_epoch{epoch}.pt"
+            ckpt_path = os.path.join(BASE_DIR, "checkpoints", f"sdtatt_epoch{epoch}.pt")
             os.makedirs(os.path.dirname(ckpt_path), exist_ok=True)
             torch.save(model.state_dict(), ckpt_path)
 
-    # Final save
-    ckpt_path = os.path.join(BASE_DIR, "checkpoints", "sdtatt_final.pt")
-    torch.save(model.state_dict(), ckpt_path)
+    # Final save & cleanup
+    final_ckpt = os.path.join(BASE_DIR, "checkpoints", "sdtatt_final.pt")
+    os.makedirs(os.path.dirname(final_ckpt), exist_ok=True)
+    torch.save(model.state_dict(), final_ckpt)
+    csv_file.close()
 
 
 if __name__ == "__main__":
