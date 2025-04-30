@@ -5,6 +5,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 from model import SDTATTModel
 from dataloader import SDTATTDataset
+from tqdm import tqdm
+
 
 # --- Hyperparameters (from the paper) ---
 
@@ -74,7 +76,7 @@ def train():
     # tv_mean, tv_std = full_dataset.tv_mean.to(DEVICE), full_dataset.tv_std.to(DEVICE)
 
     # 4) Training loop
-    for epoch in range(1, EPOCHS + 1):
+    for epoch in tqdm(range(1, EPOCHS + 1), desc="Epochs"):
         model.train()
         total_loss = 0.0
         for batch in train_loader:
