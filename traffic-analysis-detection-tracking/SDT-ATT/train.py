@@ -16,7 +16,7 @@ BASE_DIR=os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "data", "sdtatt_data.npy")
 DATA_PATH="/kaggle/input/sdtatt-np/sdtatt_data.npy"
 BATCH_SIZE = 128
-LR = 1e-3
+LR = 1e-4
 EPOCHS = 50
 HISTORY_LEN = 90       # 3s @30Hz
 FUTURE_LEN = 90        # 5s @30Hz
@@ -41,8 +41,8 @@ def gaussian_nll_loss(params, target):
     """
     mu_x = params[..., 0]
     mu_y = params[..., 1]
-    sigma_x = torch.clamp(params[..., 2], min=1e-3)
-    sigma_y = torch.clamp(params[..., 3], min=1e-3)
+    sigma_x = torch.exp(params[...,2]) + 1e-3
+    sigma_y = torch.exp(params[...,3]) + 1e-3
     rho = torch.tanh(params[..., 4])
     x = target[..., 0]
     y = target[..., 1]
@@ -99,6 +99,7 @@ def train():
             output = model(tv_hist, nv_sp, nv_dp)    # [B, T_fut, 5]
             loss = gaussian_nll_loss(output, tv_fut)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             total_loss += loss.item() * tv_hist.size(0)
 
