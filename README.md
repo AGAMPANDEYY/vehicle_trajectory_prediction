@@ -40,13 +40,15 @@ Given a 5-minute aerial video captured by a UAV, the objective is to:
      - SDT-ATT (Spatial–Dynamic Attention with Bi-LSTM) for context-aware prediction.  
      - Incorporates 3 neighboring vehicles, bi-directional memory, and attention.
 
+![{4A16A367-E9E6-48F7-8D39-25FA4724DEB2}](https://github.com/user-attachments/assets/15331ef3-ba20-4ab4-9ac2-bf925e2ca9b6)
+
 4. **Conflict Zone Detection**  
    - Conflict zones identified using Post-Encroachment Time (PET):  
      - PET = entry time of following vehicle – exit time of leading vehicle.  
      - Risk levels categorized from **SAFE** to **HIGH RISK** based on PET thresholds.  
    - Total of 141 conflict zones analyzed and mapped.
      
-![{4A16A367-E9E6-48F7-8D39-25FA4724DEB2}](https://github.com/user-attachments/assets/15331ef3-ba20-4ab4-9ac2-bf925e2ca9b6)
+
 ![{6282BAB8-CCC7-4AE5-A007-F8CA8D06B107}](https://github.com/user-attachments/assets/7cfb8997-1c49-4446-9536-e4f5aeb6c5a2)
 
 ---
@@ -55,11 +57,14 @@ Given a 5-minute aerial video captured by a UAV, the objective is to:
 
 ### Libraries & Tools
 
-- **Computer Vision:** YOLOv8s, Roboflow, OpenCV
-- **Tracking:** ByteTrack
-- **Data Handling:** Pandas, NumPy
-- **Modeling:** PyTorch, TensorFlow
-- **Visualization:** Matplotlib, Seaborn
+![image](https://github.com/user-attachments/assets/012a60ba-cf03-4df5-b798-7a09d3cf9858)
+
+
+> - **Computer Vision:** YOLOv8s, Roboflow, OpenCV
+> - **Tracking:** ByteTrack
+> - **Data Handling:** Pandas, NumPy
+> - **Modeling:** PyTorch, TensorFlow
+> - **Visualization:** Matplotlib, Seaborn
 
 ### Architecture
 
@@ -128,9 +133,9 @@ Given a 5-minute aerial video captured by a UAV, the objective is to:
 ## References
 
 - [Vehicle Trajectory Prediction Based on Multivariate Interaction Modeling (SDT-ATT)](https://ieeexplore.ieee.org/document/10323306/)
+- [PET](https://www.youtube.com/watch?v=rSABRwcVvUU)
 - [YOLOv8](https://github.com/ultralytics/ultralytics)
 - [ByteTrack](https://github.com/ifzhang/ByteTrack)
-
 
 ByteTrack: https://github.com/ifzhang/ByteTrack
 ---
