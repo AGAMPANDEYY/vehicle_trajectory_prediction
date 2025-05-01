@@ -140,9 +140,9 @@ def SDTATT_predict():
         track_id     = sample['tv_id']
         
         # Move data onto device
-        tv_hist = torch.from_numpy(sample['tv_hist']).float().unsqueeze(0).to(device)
-        nv_sp   = torch.from_numpy(sample['nv_sp']).  float().unsqueeze(0).to(device)
-        nv_dp   = torch.from_numpy(sample['nv_dp']).  float().unsqueeze(0).to(device)
+        tv_hist = torch.from_numpy(sample['tv_hist'].numpy()).float().unsqueeze(0).to(device)
+        nv_sp   = torch.from_numpy(sample['nv_sp'].numpy()).  float().unsqueeze(0).to(device)
+        nv_dp   = torch.from_numpy(sample['nv_dp'].numpy()).  float().unsqueeze(0).to(device)
 
         # Run model
         with torch.no_grad():
@@ -175,7 +175,9 @@ def SDTATT_predict():
     
     # Convert to DataFrame & save
     pred_df = pd.DataFrame(all_preds)
-    pred_df.to_csv(os.path.join(PARENT_DIR, "data", "future_trajectories.csv"),
+    CSV_PATH=os.path.join(BASE_DIR, "data", "future_trajectories.csv")
+    CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv"
+    pred_df.to_csv(CSV_PATH,
                 index=False)
     print(f"Saved {len(pred_df)} trajectory points to future_trajectories.csv")
 
@@ -188,8 +190,12 @@ if choice=="single vehicle":
 else:
     # Predict all trajectories
     SDTATT_predict()
+
+    CSV_PATH=os.path.join(BASE_DIR, "data", "future_trajectories.csv")
+    CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv"
     # Load the predicted trajectories
-    pred_df = pd.read_csv(os.path.join(PARENT_DIR, "data", "future_trajectories.csv"))
+    pred_df = pd.read_csv(CSV_PATH)
+    
     # Filter for the specific vehicle and frame
     pred_df = pred_df[(pred_df['frame_id'] == frame_id) & (pred_df['vehicle_id'] == track_id)]
     # Extract the predicted trajectory points
