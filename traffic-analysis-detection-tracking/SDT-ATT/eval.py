@@ -97,6 +97,7 @@ pred_abs, center_frame, track_id = SDTATT_predict()
 
 # Load video
 VIDEO_PATH = os.path.join(PARENT_DIR, "data", "Lane_C_Video.mp4")
+VIDEO_PATH="/kaggle/input/lne-c-video/Lane_C_Video.mp4"
 video = cv2.VideoCapture(VIDEO_PATH)
 width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
