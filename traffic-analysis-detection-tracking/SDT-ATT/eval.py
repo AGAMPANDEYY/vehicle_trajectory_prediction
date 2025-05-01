@@ -48,6 +48,16 @@ track_id = 8
 print(f"Predicting for frame_id: {frame_id}, track_id: {track_id}")
 sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
 
+
+ model = SDTATTModel(
+        input_dim=INPUT_DIM,
+        hidden_dim=HIDDEN_DIM,
+        num_neighbors=NUM_NEIGHBORS,
+        future_len=FUTURE_LEN
+    ).to(device)
+    model.load_state_dict(torch.load(CHECKPOINT_PATH))
+    model.eval()
+
 def get_predicted_maneuver(predicted_traj):
     return "Lane Change"
 
@@ -93,14 +103,7 @@ def validate_data(tv_hist, nv_sp, nv_dp):
         raise ValueError("Insufficient valid neighbors for prediction")
 
 def SDTATT_predict():
-    model = SDTATTModel(
-        input_dim=INPUT_DIM,
-        hidden_dim=HIDDEN_DIM,
-        num_neighbors=NUM_NEIGHBORS,
-        future_len=FUTURE_LEN
-    ).to(device)
-    model.load_state_dict(torch.load(CHECKPOINT_PATH))
-    model.eval()
+   
     tv_hist = sample['tv_hist'].numpy()
     nv_sp = sample['nv_sp'].numpy()
     nv_dp = sample['nv_dp'].numpy()
@@ -154,6 +157,7 @@ frame_idx = 0
 # Initialize error collection variables
 all_errors = []
 frame_errors = {}
+all_preds=[]
 
 with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as pbar:
     while video.isOpened():
