@@ -192,7 +192,7 @@ else:
     SDTATT_predict()
 
     CSV_PATH=os.path.join(BASE_DIR, "data", "future_trajectories.csv")
-    CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv")
+    CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv"
     # Load the predicted trajectories
     pred_df = pd.read_csv(CSV_PATH)
     
