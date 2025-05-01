@@ -213,6 +213,8 @@ with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as
                 for pt in nv_hist_np[n]:
                     cv2.circle(frame, tuple(pt), 2, (0, 140, 255), -1)
 
+            # Getting predicted maneuver
+            predicted_maneuver= get_predicted_maneuver(pred_trajectory)
             # Add prediction info
             if idx >= 0:
                 cv2.putText(frame, "SDT-ATT Prediction", (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 2)
@@ -269,8 +271,6 @@ with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as
                           cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 255), 2)
                 cv2.putText(frame, f"FDE: {fde:.2f}px", (30, 200), 
                           cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 255), 2)
-            # Getting predicted maneuver
-            predicted_maneuver= get_predicted_maneuver(pred_ttrajectory)
            
 
             out.write(frame)
