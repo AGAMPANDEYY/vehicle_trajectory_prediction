@@ -23,10 +23,10 @@ FUTURE_LEN = 90
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASE_DIR)
 N_DATA_PATH = os.path.join(BASE_DIR, "data", "sdtatt_data.npy")
+N_DATA_PATH="/kaggle/input/sdtatt-np/sdtatt_data.npy"
 TRACKING_CSV_PATH = os.path.join(PARENT_DIR, "data", "combined_tracking_data.csv")
 TRACKING_CSV_PATH= "/kaggle/input/combined-tracking-data/combined_tracking_data.csv"
 CHECKPOINT_PATH=os.path.join(BASE_DIR, "checkpoint","sdtatt_final.pt")
-CHECKPOINT_PATH="/kaggle/input/sdtatt-np/sdtatt_data.npy"
 
 # Load tracking data
 tracking_df = pd.read_csv(TRACKING_CSV_PATH)
