@@ -11,3 +11,5 @@ Following links have model, dataset and notebooks
 1. Model:[`sdtatt.py`](https://www.kaggle.com/models/agampy/sdtatt_np/PyTorch/default/1)
 2. Dataset: [`sdtatt_numpy`](https://www.kaggle.com/datasets/hardikchawla183/sdtatt-np) 
 3. Notebook Scripts: [`train`](https://www.kaggle.com/code/hardikchawla183/notebook6db05c8c5f), [`eval`](https://www.kaggle.com/code/agampy/sdtatt-eval)
+
+![image](https://github.com/user-attachments/assets/507ec2f0-d98a-4fd7-bcc3-8b0475dfecea)
