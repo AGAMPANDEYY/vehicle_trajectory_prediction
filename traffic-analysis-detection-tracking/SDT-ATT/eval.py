@@ -50,6 +50,34 @@ sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
 def get_predicted_maneuver(predicted_traj):
     return "Lane Change"
 
+
+def calculate_trajectory_metrics(pred_trajectory, actual_trajectory):
+    """
+    Calculate trajectory prediction metrics
+    Args:
+        pred_trajectory: predicted trajectory points
+        actual_trajectory: ground truth trajectory points
+    Returns:
+        ade: Average Displacement Error
+        fde: Final Displacement Error
+    """
+    # Ensure same length of trajectories
+    min_len = min(len(pred_trajectory), len(actual_trajectory))
+    pred = pred_trajectory[:min_len]
+    actual = actual_trajectory[:min_len]
+    
+    # Calculate displacement errors for each timestep
+    displacement_errors = [euclidean(p, a) for p, a in zip(pred, actual)]
+    
+    # Average Displacement Error (ADE)
+    ade = np.mean(displacement_errors)
+    
+    # Final Displacement Error (FDE)
+    fde = displacement_errors[-1]
+    
+    return ade, fde
+
+
 def validate_data(tv_hist, nv_sp, nv_dp):
     # Check for NaN or Inf values
     if np.any(np.isnan(tv_hist)) or np.any(np.isnan(nv_sp)) or np.any(np.isnan(nv_dp)):
