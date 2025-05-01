@@ -1,4 +1,4 @@
-# Vehicle Trajectory Prediction using Aerial Images and Object Detection
+# A Unified Bi-LSTM Architecture with Spatial–Dynamic Attention for Vehicle Trajectory Prediction and Real Time PET-Based Conflict Zone Detection​
 ![{D1BDD3E3-E4F7-49D4-9094-E119D205E330}](https://github.com/user-attachments/assets/ec57b77b-fe41-4d5c-b9d9-6a96848dd880)
 
 ## Overview
