@@ -144,9 +144,9 @@ def SDTATT_predict_all():
         track_id = int(data_sample['tv_id'])
 
         # Prepare inputs
-        tv_hist = torch.from_numpy(data_sample['tv_hist']).float().unsqueeze(0).to(device)
-        nv_sp = torch.from_numpy(data_sample['nv_sp']).float().unsqueeze(0).to(device)
-        nv_dp = torch.from_numpy(data_sample['nv_dp']).float().unsqueeze(0).to(device)
+        tv_hist = torch.from_numpy(data_sample['tv_hist'].numpy()).float().unsqueeze(0).to(device)
+        nv_sp = torch.from_numpy(data_sample['nv_sp'].numpy()).float().unsqueeze(0).to(device)
+        nv_dp = torch.from_numpy(data_sample['nv_dp'].numpy()).float().unsqueeze(0).to(device)
 
         # Model inference
         with torch.no_grad():
