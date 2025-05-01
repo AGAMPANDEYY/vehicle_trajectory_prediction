@@ -213,13 +213,7 @@ with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as
                 for pt in nv_hist_np[n]:
                     cv2.circle(frame, tuple(pt), 2, (0, 140, 255), -1)
 
-            # Getting predicted maneuver
-            predicted_maneuver= get_predicted_maneuver(pred_trajectory)
-            # Add prediction info
-            if idx >= 0:
-                cv2.putText(frame, "SDT-ATT Prediction", (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 2)
-                cv2.putText(frame, f"Predicted Maneuver: {predicted_maneuver}", (30, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 200, 255), 2)
-
+           
             # Get actual trajectory data for comparison
             actual_trajectory = []
             evaluation_frames = range(start_frame, start_frame + FUTURE_LEN)
@@ -233,6 +227,14 @@ with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as
 
                         # Convert predictions to numpy array
             pred_trajectory = pred_abs.cpu().numpy()
+            
+            # Getting predicted maneuver
+            predicted_maneuver= get_predicted_maneuver(pred_trajectory)
+            # Add prediction info
+            if idx >= 0:
+                cv2.putText(frame, "SDT-ATT Prediction", (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 2)
+                cv2.putText(frame, f"Predicted Maneuver: {predicted_maneuver}", (30, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 200, 255), 2)
+
 
             if len(actual_trajectory) > 0:
                 # Calculate metrics
