@@ -107,7 +107,7 @@ fps = video.get(cv2.CAP_PROP_FPS)
 # Output video writer
 out = cv2.VideoWriter(
     #os.path.join(PARENT_DIR, "data", "output_SDTATT2.mp4"),
-    "/kaggle/working/vehicle_trajectory_prediction/sdtatt_video",
+    "/kaggle/working/vehicle_trajectory_prediction/sdtatt_video/output_SDTATT.mp4",
     cv2.VideoWriter_fourcc(*"mp4v"),
     fps,
     (width, height)
