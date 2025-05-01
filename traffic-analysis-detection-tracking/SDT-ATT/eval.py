@@ -12,6 +12,7 @@ from tqdm import tqdm
 import os 
 import pandas as pd
 import numpy as np
+from scipy.spatial.distance import euclidean
 
 # ---- Config ----
 BATCH_SIZE = 1
