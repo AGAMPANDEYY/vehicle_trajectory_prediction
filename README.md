@@ -123,10 +123,12 @@ Given a 5-minute aerial video captured by a UAV, the objective is to:
 
 ## Authors
 
-- Agam Pandey (22113009)  
-- Hardik Chawla (22113056)  
-- Krish Sharma (22124021)  
-- Samarth Pratap Singh (22113129)
+Pre-Final Year UG students [IIT Roorkee, India](https://www.iitr.ac.in/).
+
+- [Agam Pandey] (22113009)  
+- [Hardik Chawla] (22113056)  
+- [Krish Sharma] (22124021)  
+- [Samarth Pratap Singh] (22113129)
 
 ---
 
