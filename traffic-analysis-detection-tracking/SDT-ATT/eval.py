@@ -132,54 +132,59 @@ def SDTATT_predict_vehicle():
     return pred_abs, sample['center_frame'], sample['tv_id']
 
 
-def SDTATT_predict():
-  
-    for sample in tqdm(dataset, desc="Predicting all trajectories"):
-        # Extract identifiers
-        center_frame = sample['center_frame']
-        track_id     = sample['tv_id']
-        
-        # Move data onto device
-        tv_hist = torch.from_numpy(sample['tv_hist'].numpy()).float().unsqueeze(0).to(device)
-        nv_sp   = torch.from_numpy(sample['nv_sp'].numpy()).  float().unsqueeze(0).to(device)
-        nv_dp   = torch.from_numpy(sample['nv_dp'].numpy()).  float().unsqueeze(0).to(device)
+def SDTATT_predict_all():
+    """
+    Predict future trajectories for all samples in the dataset.
+    Returns path to saved CSV of predictions.
+    """
+    all_preds = []
 
-        # Run model
+    for data_sample in tqdm(dataset, desc="Predicting all trajectories"):
+        center_frame = int(data_sample['center_frame'])
+        track_id = int(data_sample['tv_id'])
+
+        # Prepare inputs
+        tv_hist = torch.from_numpy(data_sample['tv_hist']).float().unsqueeze(0).to(device)
+        nv_sp = torch.from_numpy(data_sample['nv_sp']).float().unsqueeze(0).to(device)
+        nv_dp = torch.from_numpy(data_sample['nv_dp']).float().unsqueeze(0).to(device)
+
+        # Model inference
         with torch.no_grad():
             output = model(tv_hist, nv_sp, nv_dp)
-        # Build absolute trajectory ([FUTURE_LEN,2])
-        pred_rel = output[0,:,:2]
-        pred_abs = torch.cumsum(pred_rel, dim=0) + tv_hist[0,-1]
-        pred_np  = pred_abs.cpu().numpy()  # shape (FUTURE_LEN, 2)
 
-        # For each future timestep
+        pred_rel = output[0, :FUTURE_LEN, :2]
+        pred_abs = torch.cumsum(pred_rel, dim=0) + tv_hist[0, -1]
+        pred_np = pred_abs.cpu().numpy()
+
+        # Collect predictions
         for i in range(pred_np.shape[0]):
-            future_frame = int(center_frame) + 1 + i
-            # Try to get the bounding box for this vehicle/frame
+            future_frame = center_frame + 1 + i
             bb = tracking_df[
-                (tracking_df.frame_number == future_frame) &
-                (tracking_df.tracker_id   == track_id)
+                (tracking_df['frame_number'] == future_frame) &
+                (tracking_df['tracker_id'] == track_id)
             ]
             if bb.empty:
-                # skip or fill with NaNs
                 continue
-            x1, y1, x2, y2 = bb[['x1','y1','x2','y2']].iloc[0]
+            x1, y1 = bb[['x1','y1']].iloc[0]
+            x2, y2 = bb[['x2','y2']].iloc[0]
 
             all_preds.append({
-                'frame_id':   future_frame,
+                'frame_id': future_frame,
                 'vehicle_id': track_id,
-                'x_future':   float(pred_np[i,0]),
-                'y_future':   float(pred_np[i,1]),
-                'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2
+                'x_future': float(pred_np[i, 0]),
+                'y_future': float(pred_np[i, 1]),
+                'x1': x1, 'y1': y1,
+                'x2': x2, 'y2': y2
             })
-    
-    # Convert to DataFrame & save
+
+    # DataFrame and dedupe
     pred_df = pd.DataFrame(all_preds)
-    CSV_PATH=os.path.join(BASE_DIR, "data", "future_trajectories.csv")
-    CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv"
-    pred_df.to_csv(CSV_PATH,
-                index=False)
-    print(f"Saved {len(pred_df)} trajectory points to future_trajectories.csv")
+    pred_df = pred_df.drop_duplicates(subset=['frame_id', 'vehicle_id', 'x_future', 'y_future'])
+
+    # Save
+    out_csv = os.path.join(BASE_DIR, "data", "future_trajectories.csv")
+    pred_df.to_csv(out_csv, index=False)
+    print(f"Saved {len(pred_df)} predictions to {out_csv}")
 
 
 choice="all trajectories"
@@ -189,7 +194,7 @@ if choice=="single vehicle":
     
 else:
     # Predict all trajectories
-    SDTATT_predict()
+    SDTATT_predict_all()
 
     CSV_PATH=os.path.join(BASE_DIR, "data", "future_trajectories.csv")
     CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv"
