@@ -1,4 +1,5 @@
 # Vehicle Trajectory Prediction using Aerial Images and Object Detection
+![{D1BDD3E3-E4F7-49D4-9094-E119D205E330}](https://github.com/user-attachments/assets/ec57b77b-fe41-4d5c-b9d9-6a96848dd880)
 
 ## Overview
 
@@ -67,6 +68,7 @@ Given a 5-minute aerial video captured by a UAV, the objective is to:
 - **Conflict Zone Analysis:**  
   - PET computation  
   - Heatmap and statistical distribution analysis
+![{ACA9A4F9-E10D-4914-A70C-016E17C9D1B3}](https://github.com/user-attachments/assets/c4d3ced8-1275-49ba-9126-a1c70ed0b8ca)
 
 ---
 
