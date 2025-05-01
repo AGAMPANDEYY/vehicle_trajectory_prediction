@@ -47,6 +47,9 @@ track_id = 8
 print(f"Predicting for frame_id: {frame_id}, track_id: {track_id}")
 sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
 
+def get_predicted_maneuver(predicted_traj):
+    return "Lane Change"
+
 def validate_data(tv_hist, nv_sp, nv_dp):
     # Check for NaN or Inf values
     if np.any(np.isnan(tv_hist)) or np.any(np.isnan(nv_sp)) or np.any(np.isnan(nv_dp)):
@@ -119,6 +122,10 @@ start_frame = int(center_frame) + 1
 end_frame = start_frame + FUTURE_LEN
 frame_idx = 0
 
+# Initialize error collection variables
+all_errors = []
+frame_errors = {}
+
 with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as pbar:
     while video.isOpened():
         ret, frame = video.read()
@@ -180,7 +187,62 @@ with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as
             # Add prediction info
             if idx >= 0:
                 cv2.putText(frame, "SDT-ATT Prediction", (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 2)
-                cv2.putText(frame, f"Predicted Maneuver: Lane Keep", (30, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 200, 255), 2)
+                cv2.putText(frame, f"Predicted Maneuver: {predicted_maneuver}", (30, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 200, 255), 2)
+
+            # Get actual trajectory data for comparison
+            actual_trajectory = []
+            evaluation_frames = range(start_frame, start_frame + FUTURE_LEN)
+            for frame in evaluation_frames:
+                frame_data = tracking_df[(tracking_df['frame_number'] == frame) & 
+                                       (tracking_df['tracker_id'] == track_id)]
+                if not frame_data.empty:
+                    x_center = (frame_data['x1'].iloc[0] + frame_data['x2'].iloc[0]) / 2
+                    y_center = (frame_data['y1'].iloc[0] + frame_data['y2'].iloc[0]) / 2
+                    actual_trajectory.append([x_center, y_center])
+
+                        # Convert predictions to numpy array
+            pred_trajectory = pred_abs.cpu().numpy()
+
+            if len(actual_trajectory) > 0:
+                # Calculate metrics
+                ade, fde = calculate_trajectory_metrics(pred_trajectory, actual_trajectory)
+                #print(f"\nTrajectory Prediction Metrics:")
+                #print(f"Average Displacement Error (ADE): {ade:.2f} pixels")
+                #print(f"Final Displacement Error (FDE): {fde:.2f} pixels")
+
+            # After drawing predictions, add this code to draw actual trajectory
+            if frame_idx >= start_frame and frame_idx < end_frame:
+                current_actual_idx = frame_idx - start_frame
+                if current_actual_idx < len(actual_trajectory):
+                    # Draw actual trajectory points
+                    for i in range(current_actual_idx + 1):
+                        pt = tuple(map(int, actual_trajectory[i]))
+                        cv2.circle(frame, pt, 2, (0, 0, 255), -1)  # Red color for actual trajectory
+                    
+                    # Draw error between prediction and actual position
+                    if current_actual_idx < len(pred_trajectory):
+                        pred_pt = tuple(map(int, pred_trajectory[current_actual_idx]))
+                        actual_pt = tuple(map(int, actual_trajectory[current_actual_idx]))
+                        cv2.line(frame, pred_pt, actual_pt, (255, 0, 255), 1)  # Magenta line showing error
+                        
+                        # Calculate and store current error
+                        current_error = euclidean(pred_pt, actual_pt)
+                        frame_errors[frame_idx] = current_error
+                        all_errors.append(current_error)
+                        
+                        # Display current error on frame
+                        cv2.putText(frame, f"Current Error: {current_error:.2f}px", 
+                                  (30, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 255), 2)
+
+            # Add ADE/FDE to video if available
+            if 'ade' in locals():
+                cv2.putText(frame, f"ADE: {ade:.2f}px", (30, 160), 
+                          cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 255), 2)
+                cv2.putText(frame, f"FDE: {fde:.2f}px", (30, 200), 
+                          cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 255), 2)
+            # Getting predicted maneuver
+            predicted_maneuver= get_predicted_maneuver(pred_ttrajectory)
+           
 
             out.write(frame)
             pbar.update(1)
@@ -192,5 +254,24 @@ with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as
 
 video.release()
 out.release()
+
+# Print final error statistics
+print("\n=== Trajectory Prediction Error Statistics ===")
+print(f"Average Displacement Error (ADE): {np.mean(all_errors):.2f} pixels")
+print(f"Final Displacement Error (FDE): {all_errors[-1]:.2f} pixels")
+print(f"Maximum Error: {np.max(all_errors):.2f} pixels")
+print(f"Minimum Error: {np.min(all_errors):.2f} pixels")
+print(f"Standard Deviation of Error: {np.std(all_errors):.2f} pixels")
+
+# Save error data to CSV
+error_df = pd.DataFrame({
+    'frame': list(frame_errors.keys()),
+    'error': list(frame_errors.values())
+})
+error_csv_path = os.path.join(PARENT_DIR, "data", "trajectory_errors.csv")
+error_df.to_csv(error_csv_path, index=False)
+print(f"\nError data saved to: {error_csv_path}")
+
+
 print("Video with predictions saved!")
 
