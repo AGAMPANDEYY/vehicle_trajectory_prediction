@@ -27,6 +27,7 @@ N_DATA_PATH="/kaggle/input/sdtatt-np/sdtatt_data.npy"
 TRACKING_CSV_PATH = os.path.join(PARENT_DIR, "data", "combined_tracking_data.csv")
 TRACKING_CSV_PATH= "/kaggle/input/combined-tracking-data/combined_tracking_data.csv"
 CHECKPOINT_PATH=os.path.join(BASE_DIR, "checkpoint","sdtatt_final.pt")
+CHECKPOINT_PATH="/kaggle/input/sdtatt_np/pytorch/default/1/sdtatt_final.pt"
 
 # Load tracking data
 tracking_df = pd.read_csv(TRACKING_CSV_PATH)
