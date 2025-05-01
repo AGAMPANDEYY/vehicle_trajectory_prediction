@@ -1,5 +1,3 @@
-# vehicle_trajectory_prediction
-This project is part of CEN 300 course subject at the Civil Engineering department IIT Roorkee for Pre-Final year students.
 
 ---
 
@@ -8,19 +6,11 @@ This project is part of CEN 300 course subject at the Civil Engineering departme
 ![image](https://github.com/user-attachments/assets/c079b9cf-10e7-426a-8e9e-185a2952bce4)
 
 
-### Inputs:
-
-- Vehicle tracking data: per-frame central coordinates and bounding boxes.
-- Conflict zone annotations (14 zones) created using VIA Annotator.
-- Trimmed 45-second traffic video dataset.
 
 ![image](https://github.com/user-attachments/assets/d41fa4d5-a427-470c-957f-80c8bc1fa468)
 
 
-### Overlaid PET valus and risk labels on the video
 
-
-https://github.com/user-attachments/assets/bc36adfb-5e3e-4f55-86e0-716ebbd5d93a
 
 
 
