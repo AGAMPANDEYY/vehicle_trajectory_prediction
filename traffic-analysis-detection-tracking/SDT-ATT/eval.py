@@ -217,8 +217,8 @@ with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as
             # Get actual trajectory data for comparison
             actual_trajectory = []
             evaluation_frames = range(start_frame, start_frame + FUTURE_LEN)
-            for frame in evaluation_frames:
-                frame_data = tracking_df[(tracking_df['frame_number'] == frame) & 
+            for eval_f  in evaluation_frames:
+                frame_data = tracking_df[(tracking_df['frame_number'] == eval_f ) & 
                                        (tracking_df['tracker_id'] == track_id)]
                 if not frame_data.empty:
                     x_center = (frame_data['x1'].iloc[0] + frame_data['x2'].iloc[0]) / 2
