@@ -49,14 +49,14 @@ print(f"Predicting for frame_id: {frame_id}, track_id: {track_id}")
 sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
 
 
- model = SDTATTModel(
+model = SDTATTModel(
         input_dim=INPUT_DIM,
         hidden_dim=HIDDEN_DIM,
         num_neighbors=NUM_NEIGHBORS,
         future_len=FUTURE_LEN
     ).to(device)
-    model.load_state_dict(torch.load(CHECKPOINT_PATH))
-    model.eval()
+model.load_state_dict(torch.load(CHECKPOINT_PATH))
+model.eval()
 
 def get_predicted_maneuver(predicted_traj):
     return "Lane Change"
@@ -102,8 +102,10 @@ def validate_data(tv_hist, nv_sp, nv_dp):
     if valid_neighbors < 2:  # Require at least 2 valid neighbors
         raise ValueError("Insufficient valid neighbors for prediction")
 
-def SDTATT_predict():
-   
+
+all_preds=[]
+
+def SDTATT_predict_vehicle():
     tv_hist = sample['tv_hist'].numpy()
     nv_sp = sample['nv_sp'].numpy()
     nv_dp = sample['nv_dp'].numpy()
@@ -129,7 +131,71 @@ def SDTATT_predict():
     
     return pred_abs, sample['center_frame'], sample['tv_id']
 
-pred_abs, center_frame, track_id = SDTATT_predict()
+
+def SDTATT_predict():
+  
+    for sample in tqdm(dataset, desc="Predicting all trajectories"):
+        # Extract identifiers
+        center_frame = sample['center_frame']
+        track_id     = sample['tv_id']
+        
+        # Move data onto device
+        tv_hist = torch.from_numpy(sample['tv_hist']).float().unsqueeze(0).to(device)
+        nv_sp   = torch.from_numpy(sample['nv_sp']).  float().unsqueeze(0).to(device)
+        nv_dp   = torch.from_numpy(sample['nv_dp']).  float().unsqueeze(0).to(device)
+
+        # Run model
+        with torch.no_grad():
+            output = model(tv_hist, nv_sp, nv_dp)
+        # Build absolute trajectory ([FUTURE_LEN,2])
+        pred_rel = output[0,:,:2]
+        pred_abs = torch.cumsum(pred_rel, dim=0) + tv_hist[0,-1]
+        pred_np  = pred_abs.cpu().numpy()  # shape (FUTURE_LEN, 2)
+
+        # For each future timestep
+        for i in range(pred_np.shape[0]):
+            future_frame = int(center_frame) + 1 + i
+            # Try to get the bounding box for this vehicle/frame
+            bb = tracking_df[
+                (tracking_df.frame_number == future_frame) &
+                (tracking_df.tracker_id   == track_id)
+            ]
+            if bb.empty:
+                # skip or fill with NaNs
+                continue
+            x1, y1, x2, y2 = bb[['x1','y1','x2','y2']].iloc[0]
+
+            all_preds.append({
+                'frame_id':   future_frame,
+                'vehicle_id': track_id,
+                'x_future':   float(pred_np[i,0]),
+                'y_future':   float(pred_np[i,1]),
+                'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2
+            })
+    
+    # Convert to DataFrame & save
+    pred_df = pd.DataFrame(all_preds)
+    pred_df.to_csv(os.path.join(PARENT_DIR, "data", "future_trajectories.csv"),
+                index=False)
+    print(f"Saved {len(pred_df)} trajectory points to future_trajectories.csv")
+
+
+choice="all trajectories"
+
+if choice=="single vehicle":
+    pred_abs, center_frame, track_id = SDTATT_predict_vehicle()
+    
+else:
+    # Predict all trajectories
+    SDTATT_predict()
+    # Load the predicted trajectories
+    pred_df = pd.read_csv(os.path.join(PARENT_DIR, "data", "future_trajectories.csv"))
+    # Filter for the specific vehicle and frame
+    pred_df = pred_df[(pred_df['frame_id'] == frame_id) & (pred_df['vehicle_id'] == track_id)]
+    # Extract the predicted trajectory points
+    pred_abs = torch.tensor(pred_df[['x_future', 'y_future']].values).float()
+    center_frame = frame_id
+    track_id = track_id
 
 # Load video
 VIDEO_PATH = os.path.join(PARENT_DIR, "data", "Lane_C_Video.mp4")
@@ -157,7 +223,7 @@ frame_idx = 0
 # Initialize error collection variables
 all_errors = []
 frame_errors = {}
-all_preds=[]
+
 
 with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as pbar:
     while video.isOpened():
