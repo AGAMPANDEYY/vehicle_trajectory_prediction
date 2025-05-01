@@ -176,7 +176,7 @@ def SDTATT_predict():
     # Convert to DataFrame & save
     pred_df = pd.DataFrame(all_preds)
     CSV_PATH=os.path.join(BASE_DIR, "data", "future_trajectories.csv")
-    CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv")
+    CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv"
     pred_df.to_csv(CSV_PATH,
                 index=False)
     print(f"Saved {len(pred_df)} trajectory points to future_trajectories.csv")
