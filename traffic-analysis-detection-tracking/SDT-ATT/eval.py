@@ -39,16 +39,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ---- Load Dataset ----
 dataset = SDTATTDataset(N_DATA_PATH)
 
-
-# Set target frame and vehicle
-frame_id = 320
-track_id = 8
-
-
-print(f"Predicting for frame_id: {frame_id}, track_id: {track_id}")
-sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
-
-
 model = SDTATTModel(
         input_dim=INPUT_DIM,
         hidden_dim=HIDDEN_DIM,
@@ -105,7 +95,10 @@ def validate_data(tv_hist, nv_sp, nv_dp):
 
 all_preds=[]
 
-def SDTATT_predict_vehicle():
+def SDTATT_predict_vehicle(frame_id, track_id):
+    print(f"Predicting for frame_id: {frame_id}, track_id: {track_id}")
+    sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
+
     tv_hist = sample['tv_hist'].numpy()
     nv_sp = sample['nv_sp'].numpy()
     nv_dp = sample['nv_dp'].numpy()
@@ -139,6 +132,8 @@ def SDTATT_predict_all():
     """
     all_preds = []
 
+    tracking_dict = {(row['frame'], row['id']): row for _, row in tracking_df.iterrows()}
+
     for data_sample in tqdm(dataset, desc="Predicting all trajectories"):
         center_frame = int(data_sample['center_frame'])
         track_id = int(data_sample['tv_id'])
@@ -152,21 +147,31 @@ def SDTATT_predict_all():
         with torch.no_grad():
             output = model(tv_hist, nv_sp, nv_dp)
 
-        pred_rel = output[0, :FUTURE_LEN, :2]
+        pred_rel = output[0, :, :2]
         pred_abs = torch.cumsum(pred_rel, dim=0) + tv_hist[0, -1]
         pred_np = pred_abs.cpu().numpy()
 
+        ref_bb = tracking_dict.get((center_frame, track_id), None)
+        if ref_bb is None:
+            print(f"Skipping track_id={track_id}, no bbox info at frame={center_frame}")
+            continue
+
+        # Estimate width and height of bbox
+        width = abs(ref_bb['x2'] - ref_bb['x1'])
+        height = abs(ref_bb['y2'] - ref_bb['y1'])
+
         # Collect predictions
         for i in range(pred_np.shape[0]):
-            future_frame = center_frame + 1 + i
-            bb = tracking_df[
-                (tracking_df['frame_number'] == future_frame) &
-                (tracking_df['tracker_id'] == track_id)
-            ]
-            if bb.empty:
-                continue
-            x1, y1 = bb[['x1','y1']].iloc[0]
-            x2, y2 = bb[['x2','y2']].iloc[0]
+            future_frame = center_frame + i + 1
+
+            x_center = float(pred_np[i, 0])
+            y_center = float(pred_np[i, 1])
+
+            # Compute bounding box around predicted center
+            x1 = x_center - width / 2
+            y1 = y_center - height / 2
+            x2 = x_center + width / 2
+            y2 = y_center + height / 2
 
             all_preds.append({
                 'frame_id': future_frame,
@@ -190,7 +195,10 @@ def SDTATT_predict_all():
 choice="all trajectories"
 
 if choice=="single vehicle":
-    pred_abs, center_frame, track_id = SDTATT_predict_vehicle()
+    # Set target frame and vehicle
+    frame_id = 320
+    track_id = 8
+    pred_abs, center_frame, track_id = SDTATT_predict_vehicle(frame_id, track_id)
     
 else:
     # Predict all trajectories
@@ -200,6 +208,9 @@ else:
     CSV_PATH= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv"
     # Load the predicted trajectories
     pred_df = pd.read_csv(CSV_PATH)
+    
+    frame_id = 320
+    track_id = 8
     
     # Filter for the specific vehicle and frame
     pred_df = pred_df[(pred_df['frame_id'] == frame_id) & (pred_df['vehicle_id'] == track_id)]
@@ -237,6 +248,7 @@ frame_errors = {}
 
 
 with tqdm(total=START_BUFFER+FUTURE_LEN+END_BUFFER, desc="Processing Frames") as pbar:
+    sample = dataset.get_sample_by_frame_and_track(frame_id, track_id)
     while video.isOpened():
         ret, frame = video.read()
         if not ret:
@@ -386,4 +398,3 @@ print(f"\nError data saved to: {error_csv_path}")
 
 
 print("Video with predictions saved!")
-
