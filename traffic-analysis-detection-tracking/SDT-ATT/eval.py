@@ -152,6 +152,7 @@ def SDTATT_predict_all():
         pred_np = pred_abs.cpu().numpy()
 
         ref_bb = tracking_dict.get((center_frame, track_id), None)
+        timestamp= tracking_dict.get((center_frame, track_id), None)['timestamp']
         if ref_bb is None:
             print(f"Skipping track_id={track_id}, no bbox info at frame={center_frame}")
             continue
@@ -174,6 +175,7 @@ def SDTATT_predict_all():
             y2 = y_center + height / 2
 
             all_preds.append({
+                'timestamp': timestamp,
                 'frame_id': future_frame,
                 'vehicle_id': track_id,
                 'x_future': float(pred_np[i, 0]),
