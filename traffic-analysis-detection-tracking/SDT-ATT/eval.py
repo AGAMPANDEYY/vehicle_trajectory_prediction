@@ -187,7 +187,7 @@ def SDTATT_predict_all():
     pred_df = pred_df.drop_duplicates(subset=['frame_id', 'vehicle_id', 'x_future', 'y_future'])
 
     # Save
-    out_csv = os.path.join(BASE_DIR, "data", "future_trajectories.csv")
+    out_csv = os.path.join(PARENT_DIR, "data", "future_trajectories.csv")
     pred_df.to_csv(out_csv, index=False)
     print(f"Saved {len(pred_df)} predictions to {out_csv}")
 
