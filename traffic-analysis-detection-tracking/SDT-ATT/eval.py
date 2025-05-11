@@ -132,7 +132,7 @@ def SDTATT_predict_all():
     """
     all_preds = []
 
-    tracking_dict = {(row['frame'], row['id']): row for _, row in tracking_df.iterrows()}
+    tracking_dict = {(row['frame_number'], row['track_id']): row for _, row in tracking_df.iterrows()}
 
     for data_sample in tqdm(dataset, desc="Predicting all trajectories"):
         center_frame = int(data_sample['center_frame'])
