@@ -188,6 +188,7 @@ def SDTATT_predict_all():
 
     # Save
     out_csv = os.path.join(PARENT_DIR, "data", "future_trajectories.csv")
+    out_csv= "/kaggle/working/vehicle_trajectory_prediction/traffic-analysis-detection-tracking/data/future_trajectories.csv"
     pred_df.to_csv(out_csv, index=False)
     print(f"Saved {len(pred_df)} predictions to {out_csv}")
 
@@ -393,6 +394,7 @@ error_df = pd.DataFrame({
     'error': list(frame_errors.values())
 })
 error_csv_path = os.path.join(PARENT_DIR, "data", "trajectory_errors.csv")
+error_csv_path= "/kaggle/working/vehicle_trajectory_prediction/sdtatt_video/trajectory_errors.csv"
 error_df.to_csv(error_csv_path, index=False)
 print(f"\nError data saved to: {error_csv_path}")
 
