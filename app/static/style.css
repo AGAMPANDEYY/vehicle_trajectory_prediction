@@ -1,0 +1,204 @@
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Merriweather', Georgia, serif;
+    background: #f5f7fa;
+    color: #1a1a1a;
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  
+  /* Typography */
+  h1, h2 {
+    font-family: 'Lora', serif;
+    color: #003087;
+  }
+  
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  /* Header */
+  .site-header {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, #0046a1, #0077b6);
+    color: #fff;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .site-header .logo img {
+    height: 70px;
+    margin-right: 1.5rem;
+  }
+  
+  .site-header .title h1 {
+    margin-bottom: 0.25rem;
+    /* keep it white */
+    color: #fff;
+    /* subtle shadow for readability */
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+  }
+  
+  .site-header .title p {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1rem;
+    opacity: 0.9;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Main Content */
+  .content {
+    max-width: 960px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+  }
+  
+  .upload-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 2.5rem;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+  }
+  
+  .form-description {
+    font-family: 'Open Sans', sans-serif;
+    color: #4a4a4a;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Form Styles */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .upload-card form label {
+    display: block;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+  }
+  
+  .upload-card form input,
+  .upload-card form select {
+    width: 100%;
+    padding: 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  .upload-card form input:focus,
+  .upload-card form select:focus {
+    outline: none;
+    border-color: #003087;
+    box-shadow: 0 0 0 3px rgba(0, 48, 135, 0.1);
+  }
+  
+  .inline-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-hint {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    display: block;
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    display: inline-block;
+    padding: 0.875rem 2rem;
+    background: #003087;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    background: #002266;
+  }
+  
+  .btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 48, 135, 0.3);
+  }
+  
+  /* Footer */
+  .site-footer {
+    text-align: center;
+    padding: 2rem;
+    background: #e8ecef;
+    color: #4a4a4a;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.875rem;
+    margin-top: 4rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .site-header {
+      flex-direction: column;
+      text-align: center;
+      padding: 1rem;
+    }
+  
+    .site-header .logo img {
+      margin: 0 auto 1rem;
+    }
+  
+    .inline-inputs {
+      grid-template-columns: 1fr;
+    }
+  
+    .content {
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+    }
+  
+    .upload-card {
+      padding: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 1.5rem;
+    }
+  
+    h2 {
+      font-size: 1.25rem;
+    }
+  
+    .btn-primary {
+      width: 100%;
+      text-align: center;
+    }
+  }
