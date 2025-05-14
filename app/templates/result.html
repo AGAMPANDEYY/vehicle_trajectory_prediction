@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Processing Results</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="logo">
+      <img src="/static/iit_roorkee_logo.png" alt="IIT Roorkee" />
+    </div>
+    <div class="title">
+      <h1>Processing Complete</h1>
+      <p>Civil Engineering Department, IIT Roorkee</p>
+    </div>
+  </header>
+
+    <main class="content">
+
+      <section class="upload-card">
+        <h2>Detection Video</h2>
+        {% if processed_video_url %}
+          <video id ="fullDownloadVideo" controls width="100%" preload="auto" poster="/static/iit_roorkee_logo.png"></video>
+          <p><a href="{{ tracking_csv_url }}" download>Download Tracking CSV</a></p>
+        {% else %}
+          <p>(Skipping detection; using your CSV.)</p>
+        {% endif %}
+      </section>
+
+      <section class="upload-card">
+        <h2>SDT‑ATT Overlay</h2>
+        <video id="sdtattVideo" controls width="100%"></video>
+        <ul>
+          <li><a href="{{ future_csv_url }}" download>Download Future Trajectories CSV</a></li>
+          <li><a href="{{ error_csv_url }}" download>Download Error CSV</a></li>
+        </ul>
+      </section>
+
+     <section class="upload-card">
+      <h2>PET Conflict Zones</h2>
+      <video id ="petVideo" controls width="100%">
+      </video>
+      <p><img src="{{ heatmap_url }}" alt="Conflict Heatmap" width="100%" /></p>
+    </section>
+
+    </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2025 Civil Engineering Dept., IIT Roorkee</p>
+  </footer>
+  <script>
+  console.log("▶️ Video Loader initialized");
+
+  const videos = [
+    { id: "fullDownloadVideo", url: "{{ processed_video_url }}" },
+    { id: "sdtattVideo",      url: "{{ overlay_sdtatt_url }}" },
+    { id: "petVideo",         url: "{{ conflict_video_url }}" }
+  ];
+
+  videos.forEach(({ id, url }) => {
+    console.group(`Video [${id}]`);
+    console.log("Looking up element…");
+    const vidEl = document.getElementById(id);
+    if (!vidEl) {
+      console.error("⛔️ No <video> element with id:", id);
+      console.groupEnd();
+      return;
+    }
+
+    console.log("URL from template:", url);
+    if (!url) {
+      console.warn("⚠️ URL is empty or undefined");
+      console.groupEnd();
+      return;
+    }
+
+    console.log("Fetching full file…");
+    fetch(url)
+      .then(res => {
+        console.log("Fetch response:", res.status, res.statusText);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        console.log("Response headers:", {
+          type:  res.headers.get("Content-Type"),
+          range: res.headers.get("Accept-Ranges")
+        });
+        return res.arrayBuffer();
+      })
+      .then(buffer => {
+        console.log("Got ArrayBuffer, length =", buffer.byteLength);
+        const blob = new Blob([buffer], { type: "video/mp4" });
+        const blobURL = URL.createObjectURL(blob);
+        console.log("Assigning blob URL to video.src");
+        vidEl.src = blobURL;
+      })
+      .catch(err => {
+        console.error("❌ Video load failed for", url, err);
+        vidEl.insertAdjacentHTML("afterend",
+          `<p style="color:red">Failed to load video: ${err.message}</p>`);
+      })
+      .finally(() => console.groupEnd());
+  });
+</script>
+
+</body>
+</html>

@@ -4,17 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Vehicle Trajectory Prediction tool developed by the Civil Engineering Department, IIT Roorkee.">
-  <title>Vehicle Trajectory Prediction - IIT Roorkee</title>
+  <title>Spatio-Temporal Trajectory Conflict Analysis Platform (STCAP)- IIT Roorkee</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="icon" href="/static/iitr_favicon.ico" type="image/x-icon">
 </head>
 <body>
+
   <header class="site-header">
     <div class="logo">
       <img src="/static/iitr_logo.png" alt="IIT Roorkee Logo" aria-label="IIT Roorkee" />
     </div>
     <div class="title">
-      <h1>Vehicle Trajectory Prediction</h1>
+      <h1>Spatio-Temporal Trajectory Conflict Analysis Platform (STCAP)</h1>
       <p>Civil Engineering Department, IIT Roorkee</p>
     </div>
   </header>
@@ -23,42 +24,82 @@
     <section class="upload-card" aria-labelledby="upload-heading">
       <h2 id="upload-heading">Upload Traffic Video</h2>
       <form action="/process" method="post" enctype="multipart/form-data" aria-describedby="form-description">
-        <p id="form-description" class="form-description">Upload a traffic video to predict vehicle trajectories and analyse Conflict Zones with PET. Select prediction options and specify frame or vehicle IDs if needed.</p>
+      <p id="form-description" class="form-description">
+        Upload a traffic video to predict vehicle trajectories and analyse Conflict Zones with PET. 
+        Select prediction options and specify frame or vehicle IDs if needed, 
+        or upload an existing tracking CSV to skip detection & tracking.
+      </p>
 
+      <div class="form-group">
+        <label for="video">Video File</label>
+        <input type="file" id="video" name="video" accept="video/*" aria-required="true">
+      </div>
+
+      <div class="form-group">
+        <label for="tracking_csv">Existing Tracking CSV (optional)</label>
+        <input type="file" id="tracking_csv" name="tracking_csv" accept=".csv">
+        <small class="form-hint">
+          If you already have detection & tracking results, upload the CSV to skip that step.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="choice">Prediction Choice</label>
+        <select id="choice" name="choice" aria-describedby="choice-description">
+          <option value="all">All Vehicles</option>
+          <option value="single">Single Vehicle</option>
+        </select>
+        <small id="choice-description" class="form-hint">
+          Choose to predict trajectories for all vehicles or a single vehicle.
+        </small>
+      </div>
+
+      <div class="inline-inputs">
         <div class="form-group">
-          <label for="video">Video File</label>
-          <input type="file" id="video" name="video" accept="video/*" required aria-required="true">
+          <label for="frame_id">Frame ID</label>
+          <input type="number" id="frame_id" name="frame_id" placeholder="e.g., 25" min="1" aria-describedby="frame_id-description">
+          <small id="frame_id-description" class="form-hint">
+            Enter the frame number for single vehicle prediction (optional).
+          </small>
         </div>
-
         <div class="form-group">
-          <label for="choice">Prediction Choice</label>
-          <select id="choice" name="choice" aria-describedby="choice-description">
-            <option value="all">All Vehicles</option>
-            <option value="single">Single Vehicle</option>
-          </select>
-          <small id="choice-description" class="form-hint">Choose to predict trajectories for all vehicles or a single vehicle.</small>
+          <label for="vehicle_id">Vehicle ID</label>
+          <input type="number" id="vehicle_id" name="vehicle_id" placeholder="e.g., 3" min="1" aria-describedby="vehicle_id-description">
+          <small id="vehicle_id-description" class="form-hint">
+            Enter the vehicle ID for single vehicle prediction (optional).
+          </small>
         </div>
+      </div>
 
-        <div class="inline-inputs">
-          <div class="form-group">
-            <label for="frame_id">Frame ID</label>
-            <input type="number" id="frame_id" name="frame_id" placeholder="e.g., 25" min="1" aria-describedby="frame_id-description">
-            <small id="frame_id-description" class="form-hint">Enter the frame number for single vehicle prediction (optional).</small>
-          </div>
-          <div class="form-group">
-            <label for="vehicle_id">Vehicle ID</label>
-            <input type="number" id="vehicle_id" name="vehicle_id" placeholder="e.g., 3" min="1" aria-describedby="vehicle_id-description">
-            <small id="vehicle_id-description" class="form-hint">Enter the vehicle ID for single vehicle prediction (optional).</small>
-          </div>
-        </div>
+      <button type="submit" class="btn-primary">Process Video / CSV</button>
+    </form>
 
-        <button type="submit" class="btn-primary">Process Video</button>
-      </form>
     </section>
   </main>
 
   <footer class="site-footer">
     <p>&copy; 2025 Civil Engineering Department, Indian Institute of Technology Roorkee. All rights reserved.</p>
   </footer>
+
+ <script>
+  const overlay   = document.getElementById('processingOverlay');
+  const previewVid= document.getElementById('previewVid');
+  const form      = document.querySelector('form');
+  const fileInput = document.getElementById('video');
+
+  // preview the file
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) previewVid.src = URL.createObjectURL(file);
+  });
+
+  // SHOW the overlay, then DO the normal submit
+  form.addEventListener('submit', () => {
+    overlay.style.display = 'flex';
+    // no preventDefault(), no fetch() → page will navigate to /process
+  });
+</script>
+
+
 </body>
 </html>

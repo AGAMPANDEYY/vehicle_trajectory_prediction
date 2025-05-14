@@ -14,7 +14,7 @@
   }
   
   /* Typography */
-  h1, h2 {
+  h1, h2, h3 {
     font-family: 'Lora', serif;
     color: #003087;
   }
@@ -26,6 +26,11 @@
   
   h2 {
     font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
     font-weight: 600;
   }
   
@@ -46,9 +51,7 @@
   
   .site-header .title h1 {
     margin-bottom: 0.25rem;
-    /* keep it white */
     color: #fff;
-    /* subtle shadow for readability */
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
   }
   
@@ -162,6 +165,50 @@
     margin-top: 4rem;
   }
   
+  /* Processing Container */
+  .processing-container {
+    text-align: center;
+    margin: 3rem auto;
+    max-width: 600px;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  }
+  
+  .progress-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  
+  .progress-container progress {
+    width: 300px;
+    height: 20px;
+  }
+  
+  .progress-container span {
+    margin-left: 1rem;
+    font-weight: bold;
+    font-family: 'Open Sans', sans-serif;
+  }
+  
+  /* Spinner */
+  .spinner {
+    width: 48px; 
+    height: 48px;
+    border: 6px solid #e1e1e1;
+    border-top-color: #0056b3;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 1rem auto;
+  }
+  
+  @keyframes spin { 
+    to { transform: rotate(360deg); } 
+  }
+  
   /* Responsive Design */
   @media (max-width: 768px) {
     .site-header {
@@ -186,6 +233,11 @@
     .upload-card {
       padding: 1.5rem;
     }
+  
+    .processing-container {
+      margin: 1.5rem auto;
+      padding: 1.5rem;
+    }
   }
   
   @media (max-width: 480px) {
@@ -197,8 +249,19 @@
       font-size: 1.25rem;
     }
   
+    h3 {
+      font-size: 1rem;
+    }
+  
     .btn-primary {
       width: 100%;
       text-align: center;
     }
+  
+    .progress-container progress {
+      width: 200px;
+    }
   }
+  .hidden {
+  display: none !important;
+}

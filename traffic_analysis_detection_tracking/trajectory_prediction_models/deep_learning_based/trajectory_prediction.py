@@ -44,14 +44,14 @@ class TrajectoryDataset(Dataset):
         return torch.FloatTensor(input_seq), torch.FloatTensor(target_seq)
 
 class LSTMPredictor(nn.Module):
-    def __init__(self, input_size=2, hidden_size=64, num_layers=2, output_size=2, prediction_length=10):
+    def __init__(self, input_size=2, hidden_size=64, num_layers=2, output_size=2, prediction_length=120):
         super(LSTMPredictor, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.prediction_length = prediction_length
         
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
-        self.fc = nn.Linear(hidden_size, output_size * prediction_length)
+        self.fc = nn.Linear(hidden_size, 240)
     
     def forward(self, x):
         batch_size = x.size(0)
@@ -79,7 +79,7 @@ def train_model(model, train_loader, num_epochs=50, learning_rate=0.001):
             print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {avg_loss:.4f}')
 
 class TrajectoryPredictor:
-    def __init__(self, model_path, sequence_length=20, prediction_length=10):
+    def __init__(self, model_path, sequence_length=90, prediction_length=120):
         self.sequence_length = sequence_length
         self.prediction_length = prediction_length
         self.model = LSTMPredictor(prediction_length=prediction_length)
@@ -107,7 +107,7 @@ class TrajectoryPredictor:
         
         return predictions
 
-def visualize_predictions(video_path, model_path, output_path, sequence_length=20, prediction_length=10):
+def visualize_predictions(video_path, model_path, output_path, sequence_length=90, prediction_length=120):
     # Initialize YOLO and tracker
     model = YOLO('yolov8n.pt')
     tracker = sv.ByteTrack()
@@ -205,27 +205,27 @@ def visualize_predictions(video_path, model_path, output_path, sequence_length=2
 
 if __name__ == "__main__":
     # Create data directory if it doesn't exist
-    data_dir = 'C:/Agam/Work/cen-300/supervision/examples/traffic_analysis/'
+    data_dir = r'D:\vehicle_trajectory_prediction\traffic_analysis_detection_tracking'
     os.makedirs(data_dir, exist_ok=True)
     
     # First, train the model
     # Load your tracking data
-    data = pd.read_csv(os.path.join(data_dir, 'data/tracking_data.csv'))
+    data = pd.read_csv(os.path.join(data_dir, 'data/combined_tracking_data.csv'))
     
     # Create dataset and dataloader
-    dataset = TrajectoryDataset(data, sequence_length=20, prediction_length=10)
+    dataset = TrajectoryDataset(data, sequence_length=90, prediction_length=120)
     train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
     
     # Initialize and train model
-    model = LSTMPredictor(prediction_length=10)
+    model = LSTMPredictor(prediction_length=120)
     train_model(model, train_loader)
     
     # Save the trained model
-    model_path = os.path.join(data_dir, 'trajectory_prediction_models/deep_learning_based/trajectory_predictor.pth')
+    model_path = os.path.join(data_dir, 'trajectory_prediction_models/deep_learning_based/trajectory_predictor_120.pth')
     torch.save(model.state_dict(), model_path)
     
     # Then, visualize predictions on video
-    video_path = os.path.join(data_dir, 'data/0212.mp4')
+    video_path = os.path.join(data_dir, 'data/Lane_C_Video.mp4')
     output_path = os.path.join(data_dir, 'trajectory_prediction_models/deep_learning_based/output_with_predictions.mp4')
     
     visualize_predictions(

@@ -23,7 +23,7 @@ class PETPipeline:
         self.df.rename(columns={
             'timestamp': 'Time',
             'frame_number': 'Frame_ID',
-            'vehicle_id': 'Vehicle_ID',
+            'tracker_id': 'Vehicle_ID',
             'x': 'X_central',
             'y': 'Y_central',
             'x1': 'X1_boundary',

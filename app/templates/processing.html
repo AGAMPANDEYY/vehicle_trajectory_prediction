@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Processing Video...</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <img src="/static/iitr_logo.png" alt="IIT Roorkee Logo" />
+    </div>
+    <div class="title">
+      <h1>Spatio-Temporal Conflict Analysis</h1>
+      <p>Civil Engineering Department, IIT Roorkee</p>
+    </div>
+  </header>
+
+  <main class="processing-container">
+    <h2>Processing Video or CSV</h2>
+    <p class="form-description">Your job is running. You can preview your input below:</p>
+
+    <!-- Preview original video if you uploaded one -->
+    {% if input_video_url %}
+      <video width="100%" controls autoplay muted loop>
+        <source src="/outputs/Lane_C_Video.mp4" type="video/mp4">
+      </video>
+    {% endif %}
+
+    <div id="spinner" class="spinner"></div>
+
+    <div class="progress-container">
+      <progress id="progressBar" value="0" max="100"></progress>
+      <span id="progressText">0%</span>
+    </div>
+
+   <button
+      id="showResultsBtn"
+      class="hidden btn-primary"
+      style="margin-top:1rem;"
+    >
+      Show Results
+    </button>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2025 IIT Roorkee. All rights reserved.</p>
+  </footer>
+
+ <script>
+  const taskId      = "{{ task_id }}";
+  const progressBar = document.getElementById('progressBar');
+  const progressText= document.getElementById('progressText');
+  const spinner     = document.getElementById('spinner');
+  const showBtn     = document.getElementById('showResultsBtn');
+  const progressCtr = document.querySelector('.progress-container');
+
+  // Kick off the background job
+  fetch(`/run/${taskId}`, { method: 'POST' })
+    .then(() => startPolling())
+    .catch(err => console.error('Failed to start job:', err));
+
+  function startPolling() {
+    const interval = setInterval(async () => {
+      try {
+        const res  = await fetch(`/status/${taskId}`);
+        const data = await res.json();
+
+        // update bar & text
+        progressBar.value        = data.progress;
+        progressText.textContent = `${data.progress}%`;
+
+        if (data.status === 'completed') {
+          clearInterval(interval);
+
+          // hide spinner + progress
+          spinner.classList.add('hidden');
+          progressCtr.classList.add('hidden');
+
+          // reveal button
+          showBtn.classList.remove('hidden');
+        }
+        else if (data.status === 'error') {
+          clearInterval(interval);
+          alert('Error: ' + data.message);
+        }
+        // otherwise just wait for next tick
+      } catch (err) {
+        clearInterval(interval);
+        console.error('Polling error:', err);
+      }
+    }, 1000);
+  }
+
+  // wire up the “Show Results” button
+  showBtn.addEventListener('click', () => {
+    window.location.href = `/result/${taskId}`;
+  });
+</script>
+</body>
+</html>

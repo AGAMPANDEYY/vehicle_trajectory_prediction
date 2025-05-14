@@ -195,7 +195,7 @@ def SDTATT_predict_all():
     print(f"Saved {len(pred_df)} predictions to {out_csv}")
 
 
-choice="all trajectories"
+choice="single vehicle"
 
 if choice=="single vehicle":
     # Set target frame and vehicle
@@ -205,6 +205,7 @@ if choice=="single vehicle":
     
 else:
     # Predict all trajectories
+    frame_id = 320
     SDTATT_predict_all()
 
     CSV_PATH=os.path.join(BASE_DIR, "data", "future_trajectories.csv")

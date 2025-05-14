@@ -98,14 +98,14 @@ if __name__ == "__main__":
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     PARENT_DIR = os.path.dirname(BASE_DIR)
     # Define input variables manually
-    VIDEO_PATH = "/path/to/input/video.mp4"  # Path to the input video
-    YOLO_WEIGHTS = "/path/to/yolo/weights.pt"  # Path to YOLO weights
-    LSTM_MODEL = "/path/to/lstm/model.pth"  # Path to LSTM model for trajectory prediction
+    VIDEO_PATH = r"C:\Agam\Work\vehicle_trajectory_prediction\traffic_analysis_detection_tracking\data\Lane_C_Video.mp4"  # Path to the input video
+    YOLO_WEIGHTS = r"C:\Agam\Work\vehicle_trajectory_prediction\traffic_analysis_detection_tracking\data\best.pt"  # Path to YOLO weights
+    LSTM_MODEL = r"C:\Agam\Work\vehicle_trajectory_prediction\traffic_analysis_detection_tracking\trajectory_prediction_models\deep_learning_based\trajectory_predictor_120.pth"  # Path to LSTM model for trajectory prediction
     CHOICE = "all"  # Choose "all" for all vehicles or "single" for a specific vehicle
     FRAME_ID = 320  # Frame ID for single vehicle prediction (only if choice is "single")
     VEHICLE_ID = 8  # Vehicle ID for single vehicle prediction (only if choice is "single")
-    OUTPUT_DIR = "/path/to/output/directory"  # Directory to save outputs
-    ZONE_PATH = "/path/to/conflict/zones.csv"  # Path to conflict zones CSV
+    OUTPUT_DIR = r"C:\Agam\Work\vehicle_trajectory_prediction\output"  # Directory to save outputs
+    ZONE_PATH = r"C:\Agam\Work\vehicle_trajectory_prediction\output"  # Path to conflict zones CSV
    
     SDTATT_NUMPY_DATA_PATH = os.path.join(BASE_DIR, "data", "sdtatt_data.npy")
     SDTATT_NUMPY_DATA_PATH="/kaggle/input/sdtatt-np/sdtatt_data.npy"

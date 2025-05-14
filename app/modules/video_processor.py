@@ -12,7 +12,7 @@ from traffic_analysis_detection_tracking.trajectory_prediction_models.deep_learn
 from traffic_analysis_detection_tracking.trajectory_prediction_models.physics_based.kalman_filter import KalmanFilterPredictor
 
 class CombinedPredictor:
-    def __init__(self, lstm_model_path, sequence_length=20, prediction_length=10):
+    def __init__(self, lstm_model_path, sequence_length=90, prediction_length=120):
         # Initialize LSTM predictor
         self.lstm_predictor = TrajectoryPredictor(lstm_model_path, sequence_length, prediction_length)
         

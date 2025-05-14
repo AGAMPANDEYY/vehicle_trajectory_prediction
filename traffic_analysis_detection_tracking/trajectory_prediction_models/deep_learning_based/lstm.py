@@ -24,7 +24,7 @@ def create_sequences(data, seq_length):
         y.append(data[i+seq_length])
     return np.array(X), np.array(y)
 
-seq_length = 10  # For instance, use 10 timesteps
+seq_length = 120  # For instance, use 10 timesteps
 X, y = create_sequences(positions_scaled, seq_length)
 
 # Split data into training and testing sets
