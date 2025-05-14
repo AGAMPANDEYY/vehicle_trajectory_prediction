@@ -47,6 +47,8 @@ Accurate vehicle trajectory forecasting and conflict zone mapping are critical f
 - **End-to-End Automated Pipeline**  
   From raw video input to risk-mapped outputs, suitable for integration into traffic management systems or research workflows[2].
 
+![Alt Text](https://github.com/user-attachments/assets/6e656556-4f5a-462e-a6b6-7deb07e56093)
+
 ---
 
 ## Methodology
@@ -75,11 +77,11 @@ Accurate vehicle trajectory forecasting and conflict zone mapping are critical f
 ```mermaid
 graph TD
     A[Drone Video Input] --> B[YOLOv8 Detection]
-    B --> C[Multi-Object Tracking (ByteTrack)]
+    B --> C[Multi-Object Tracking<br>ByteTrack]
     C --> D[Trajectory Extraction]
     D --> E[BiLSTM + Spatial-Dynamic Attention]
     E --> F[Trajectory Prediction]
-    F --> G[Conflict Zone Mapping (PET)]
+    F --> G[Conflict Zone Mapping<br>PET]
     G --> H[Risk Heatmap Visualization]
     H --> I[STCAP Web Portal]
 ```
